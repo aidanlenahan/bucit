@@ -1,0 +1,8 @@
+- add filters in manage_tickets.php
+- email functionality
+- log in technician
+- milonas assignes people to computers
+- battle pass implemention as tech rewards for each marking period
+- 
+
+

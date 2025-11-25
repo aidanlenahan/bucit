@@ -1,0 +1,53 @@
+Project overview for bucit workspace
+
+Files and purpose:
+
+- index.html
+  - Public ticket submission form (Chromebook Tech Support Ticket). Posts to `support_ticket.php`.
+
+- support_ticket.php
+  - Processes the public ticket form, inserts new rows into `tickets`. Sets server-side `date_reported` and (if present) stores `restarted` and other fields. Redirects to `submit_success.php` on success.
+
+- submit_success.php
+  - User-facing confirmation page that displays the submitted ticket ID and links to re-submit or check status.
+
+- manage_tickets.php
+  - Admin/technician dashboard. Lists tickets with sorting, search, filtering, pagination and per-page controls. Requires technician login. Shows `Tech` and `Priority` columns when available. Small compact controls (per-page, priority, search icon, + for new ticket, logout).
+
+- edit_ticket.php
+  - View and edit individual tickets. Shows details, admin notes, status, priority, and `Tech`. If a technician is logged in, shows "Pick up ticket" button which assigns the ticket to the logged-in tech and sets status to "In Progress". Allows editing of fields and saving updates to DB.
+
+- status.php
+  - Public status lookup page where students can enter ticket ID and see ticket status and notes.
+
+- update_database.php
+  - Schema migration helper. Adds missing columns to `tickets` (`status`, `notes`, `created_at`, `priority`, `restarted`, `tech`) and creates the `technicians` table if missing. Seeds `technicians` from `Names.txt` (user display names) and generates usernames (first initial + last name). Also sets all technician passwords to default 'changeme' and forces `must_change_password=1`.
+
+- Names.txt
+  - One technician display name per line; used to seed the `technicians` table. Edited to include 'Alexander Wood'.
+
+- styles.css
+  - Site CSS including theme variables (brand color #800000) and shared styles for forms, tables and buttons.
+
+- script.js
+  - Small JS helpers used by the public form (dynamic subproblem selection etc.).
+
+- admin_tech.php
+  - Admin panel accessible only to the admin user `jmilonas`. Allows toggling active state, resetting passwords to 'changeme', and creating new technician accounts (enter display name; username generated as first initial + last name).
+
+- login.php
+  - Technician login page (formerly `tech_login.php`). Authenticates against the `technicians` table. On first login (must_change_password=1) redirects to `insert.php` for password change.
+
+- logout.php
+  - Logs the technician out (destroys session) and redirects to `login.php`.
+
+- insert.php
+  - Change-password page (renamed from `tech_change_password.php`). Logged-in users must change their initial password; the form verifies the current password and updates the stored hash using `password_hash`.
+
+- overview.txt
+  - This file (the current document) summarizing the codebase and file responsibilities.
+
+Notes and next steps:
+- Security hardening recommended: enable HTTPS, set secure session cookie flags, add CSRF protection to state-changing forms, and implement rate-limiting on login attempts.
+- Consider normalizing `tickets.tech` to store a `technician_id` foreign key instead of username strings for referential integrity. I can implement that migration if you want.
+- The admin account for Jeremy is created/seeded as username `jmilonas` with default password `changeme` and `must_change_password=1`.
