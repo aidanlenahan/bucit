@@ -1,0 +1,120 @@
+:root { --brand: #800000; --brand-dark: #5a0000; --card-bg: rgba(255,255,255,0.98); }
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--brand);
+  margin: 0;
+  padding: 0;
+  color: #fff;
+}
+
+main {
+  width: 420px;
+  margin: 40px auto 0 auto;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 32px 24px;
+  color: #222;
+}
+
+h2 {
+  margin-bottom: 20px;
+  color: var(--brand);
+  text-align: center;
+}
+
+form label {
+  display: block;
+  margin-bottom: 5px;
+  margin-top: 15px;
+  color: var(--brand);
+  font-weight: 500;
+}
+
+form input,
+form button {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d1d1;
+  border-radius: 5px;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+form input:focus {
+  border-color: #7b1fa2;
+  outline: none;
+}
+
+form button {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  font-size: 1.05em;
+  font-weight: bold;
+  margin-top: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+form button:hover {
+  background: var(--brand-dark);
+}
+
+#chatbot-container {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  width: 320px;
+  background: #fff;
+  border-radius: 12px 12px 10px 10px;
+  box-shadow: 0 4px 24px #ccc;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#chatbot-header {
+  background: #e0e0e0;
+  padding: 12px;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+}
+
+#chatbot-messages {
+  padding: 12px;
+  height: 180px;
+  overflow-y: auto;
+  font-size: 0.95em;
+}
+
+#chatbot-form {
+  display: flex;
+  border-top: 1px solid #ccc;
+  background: #f6f6f6;
+}
+
+#chatbot-input {
+  border: none;
+  padding: 10px;
+  flex: 1;
+  border-radius: 0 0 0 8px;
+  font-size: 1em;
+}
+
+#chatbot-form button {
+  border: none;
+  padding: 10px 20px;
+  background: var(--brand);
+  color: #fff;
+  border-radius: 0 0 8px 0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#chatbot-form button:hover {
+  background: var(--brand-dark);
+}
