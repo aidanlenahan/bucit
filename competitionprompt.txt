@@ -1,0 +1,10 @@
+Make implementation for the following:
+- Titled "Bucit Ranked"
+- A competition-aspect between the technicians which allows them to score points based on what category problem they resolved.
+- For example, a screen replacement is 10 points, battery issue is 5 points, keyboard issue is 7 points, wifi connectivity is 2 points, can't log in is 3 points, and anything else is subject to judgement by user jmilonas.
+- If the amount of points for a category is subjective, jmilonas can edit the number of points awarded for closing said ticket.
+- Each technician (besides jmilonas) gets these points tallied up.
+- There is a leaderboard for the technicians. The point count should be "trophies" like from clash royale.
+
+- Make a leaderboard that is consistently styled with the rest of the pages
+- Make jmilonas able to edit the point count for each technician. When you click on each technician, you should be able to see the point count. Specifically, how many points earned from each ticket resolve. jmilonas should be able to edit the amount of points awarded from each ticket aside from default. for example, if a ticket is categorized as "Wifi connectivity" (2 or 3 points) but requires a new motherboard, that is a lot more work than simply getting a user back on wifi. jmilonas should be able to edit the points awarded (aside from default, 2 or 3) to increase the point count since it now requires more work.

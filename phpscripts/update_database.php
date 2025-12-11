@@ -162,6 +162,50 @@ if ($check_col('must_change_password') === false) {
     }
 }
 
+// Create ticket_points table for Bucit Ranked leaderboard
+$check_points_table = "SHOW TABLES LIKE 'ticket_points'";
+$points_res = $conn->query($check_points_table);
+if (!$points_res || $points_res->num_rows == 0) {
+    $tickets_engine = null;
+    $engine_res = $conn->query("SHOW TABLE STATUS LIKE 'tickets'");
+    if ($engine_res && $engine_res->num_rows > 0) {
+        $engine_row = $engine_res->fetch_assoc();
+        $tickets_engine = $engine_row['Engine'] ?? null;
+    }
+    $engine_res && $engine_res->close();
+
+    $can_fk = (strcasecmp((string)$tickets_engine, 'InnoDB') === 0);
+
+    $create_points = "CREATE TABLE ticket_points (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ticket_id INT NOT NULL UNIQUE,
+        tech VARCHAR(150) NOT NULL,
+        problem_category VARCHAR(50) DEFAULT NULL,
+        base_points INT NOT NULL DEFAULT 0,
+        awarded_points INT NOT NULL DEFAULT 0,
+        manual_override TINYINT(1) NOT NULL DEFAULT 0,
+        notes TEXT DEFAULT NULL,
+        updated_by VARCHAR(150) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
+
+    if ($can_fk) {
+        $create_points .= ",
+        CONSTRAINT fk_ticket_points_ticket FOREIGN KEY (ticket_id)
+            REFERENCES tickets(id) ON DELETE CASCADE";
+    }
+
+    $create_points .= ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+    if ($conn->query($create_points)) {
+        echo "<p style='color: green;'>✓ Created 'ticket_points' table" . ($can_fk ? '' : " (without FK; 'tickets' table is not InnoDB)") . "</p>";
+    } else {
+        echo "<p style='color: red;'>✗ Error creating 'ticket_points' table: " . $conn->error . "</p>";
+    }
+} else {
+    echo "<p style='color: blue;'>ℹ 'ticket_points' table already exists</p>";
+}
+
 // helper: generate username: first initial + last name, lowercase and alphanumeric
 $normalize_username = function($full){
     $parts = preg_split('/\s+/', trim($full));
