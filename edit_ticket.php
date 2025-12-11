@@ -38,6 +38,93 @@ $has_restarted = ($restartedCheck && $restartedCheck->num_rows > 0);
 $techCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'tech'");
 $has_tech = ($techCheck && $techCheck->num_rows > 0);
 
+// Default point values for Bucit Ranked (per category)
+$bucit_point_defaults = [
+    'screen' => 10,
+    'battery' => 5,
+    'keyboard' => 7,
+    'wifi' => 2,
+    'login' => 3,
+    'other' => 0
+];
+
+function bucit_points_table_exists($conn) {
+    static $exists = null;
+    if ($exists !== null) {
+        return $exists;
+    }
+    $res = $conn->query("SHOW TABLES LIKE 'ticket_points'");
+    $exists = ($res && $res->num_rows > 0);
+    return $exists;
+}
+
+function bucit_default_points_for_category($category, $defaults) {
+    $key = strtolower(trim($category ?? ''));
+    return $defaults[$key] ?? 0;
+}
+
+function bucit_award_points_if_needed($conn, $ticket_id, $previous_status, $ticket, $defaults) {
+    if (!bucit_points_table_exists($conn) || !$ticket) {
+        return;
+    }
+
+    $current_status = $ticket['status'] ?? '';
+    if (strcasecmp($current_status, 'Closed') !== 0) {
+        return;
+    }
+
+    $tech = trim($ticket['tech'] ?? '');
+    if ($tech === '' || strtolower($tech) === 'jmilonas') {
+        return;
+    }
+
+    $problem_category = $ticket['problem_category'] ?? '';
+    $base_points = bucit_default_points_for_category($problem_category, $defaults);
+
+    $existing = null;
+    $stmt = $conn->prepare('SELECT id, manual_override FROM ticket_points WHERE ticket_id = ? LIMIT 1');
+    if ($stmt) {
+        $stmt->bind_param('i', $ticket_id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        if ($res && $res->num_rows > 0) {
+            $existing = $res->fetch_assoc();
+        }
+        $stmt->close();
+    }
+
+    $updated_by = 'system';
+
+    if ($existing) {
+        $manual_override = intval($existing['manual_override'] ?? 0);
+        if ($manual_override) {
+            $update = $conn->prepare('UPDATE ticket_points SET tech = ?, problem_category = ?, base_points = ?, updated_by = ?, updated_at = NOW() WHERE id = ?');
+            if ($update) {
+                $update->bind_param('ssisi', $tech, $problem_category, $base_points, $updated_by, $existing['id']);
+                $update->execute();
+                $update->close();
+            }
+        } else {
+            $awarded = $base_points;
+            $update = $conn->prepare('UPDATE ticket_points SET tech = ?, problem_category = ?, base_points = ?, awarded_points = ?, manual_override = 0, updated_by = ?, updated_at = NOW() WHERE id = ?');
+            if ($update) {
+                $update->bind_param('ssissi', $tech, $problem_category, $base_points, $awarded, $updated_by, $existing['id']);
+                $update->execute();
+                $update->close();
+            }
+        }
+        return;
+    }
+
+    $awarded = $base_points;
+    $insert = $conn->prepare('INSERT INTO ticket_points (ticket_id, tech, problem_category, base_points, awarded_points, manual_override, notes, updated_by) VALUES (?, ?, ?, ?, ?, 0, NULL, ?)');
+    if ($insert) {
+        $insert->bind_param('ississ', $ticket_id, $tech, $problem_category, $base_points, $awarded, $updated_by);
+        $insert->execute();
+        $insert->close();
+    }
+}
+
 // Get ticket details (used for defaults on the form)
 $sql = "SELECT * FROM tickets WHERE id = ?";
 $stmt = $conn->prepare($sql);
@@ -53,19 +140,36 @@ if ($result->num_rows == 0) {
 $ticket = $result->fetch_assoc();
 $stmt->close();
 
-// Load technician names from Names.txt for the tech dropdown
-$tech_names = [];
-$names_path = __DIR__ . DIRECTORY_SEPARATOR . 'Names.txt';
-if (file_exists($names_path)) {
-    $lines = file($names_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    if ($lines !== false) {
-        // Trim lines and skip empty ones
-        foreach ($lines as $ln) {
-            $n = trim($ln);
-            if ($n !== '') $tech_names[] = $n;
-        }
+$current_ticket_tech = $ticket['tech'] ?? '';
+if (!empty($current_ticket_tech) && !isset($tech_display_lookup[$current_ticket_tech])) {
+    $tech_options[] = [
+        'username' => $current_ticket_tech,
+        'display_name' => $current_ticket_tech,
+        'active' => 0
+    ];
+    $tech_display_lookup[$current_ticket_tech] = $current_ticket_tech;
+}
+
+$previous_status = $ticket['status'] ?? null;
+$assigned_tech_display = '';
+if (!empty($ticket['tech']) && isset($tech_display_lookup[$ticket['tech']])) {
+    $assigned_tech_display = $tech_display_lookup[$ticket['tech']];
+} elseif (!empty($ticket['tech'])) {
+    $assigned_tech_display = $ticket['tech'];
+}
+
+// Load technicians from DB for dropdown/display (fallback to current assignment if needed)
+$tech_options = [];
+$tech_display_lookup = [];
+
+$tech_query = $conn->query("SELECT username, COALESCE(display_name, username) AS display_name, active FROM technicians ORDER BY display_name ASC");
+if ($tech_query && $tech_query->num_rows > 0) {
+    while ($row = $tech_query->fetch_assoc()) {
+        $tech_options[] = $row;
+        $tech_display_lookup[$row['username']] = $row['display_name'];
     }
 }
+
 
 // Handle form submission for updates
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -108,6 +212,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $res = $stmt->get_result();
                     if ($res && $res->num_rows) {
                         $ticket = $res->fetch_assoc();
+                        bucit_award_points_if_needed($conn, $ticket_id, $previous_status, $ticket, $bucit_point_defaults);
+                        $previous_status = $ticket['status'] ?? $previous_status;
                     }
                     $stmt->close();
                 } else {
@@ -205,6 +311,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $res = $stmt->get_result();
                 if ($res && $res->num_rows) {
                     $ticket = $res->fetch_assoc();
+                        bucit_award_points_if_needed($conn, $ticket_id, $previous_status, $ticket, $bucit_point_defaults);
+                        $previous_status = $ticket['status'] ?? $previous_status;
                 }
                 $stmt->close();
             } else {
@@ -478,7 +586,7 @@ $stmt->close();
                 <?php if ($has_tech): ?>
                 <div class="detail-item">
                     <div class="detail-label">Tech</div>
-                    <div class="detail-value"><?php echo htmlspecialchars($ticket['tech'] ?? ''); ?></div>
+                    <div class="detail-value"><?php echo htmlspecialchars($assigned_tech_display ?: ($ticket['tech'] ?? '')); ?></div>
                 </div>
                 <?php endif; ?>
                 
@@ -627,8 +735,11 @@ $stmt->close();
                     <label for="tech">Tech</label>
                     <select id="tech" name="tech">
                         <option value="">— Unassigned —</option>
-                        <?php foreach ($tech_names as $tname): ?>
-                            <option value="<?php echo htmlspecialchars($tname); ?>" <?php echo (isset($ticket['tech']) && $ticket['tech'] === $tname) ? 'selected' : ''; ?>><?php echo htmlspecialchars($tname); ?></option>
+                        <?php foreach ($tech_options as $tech_row): ?>
+                            <?php $value = $tech_row['username']; $label = $tech_row['display_name']; ?>
+                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo (!empty($ticket['tech']) && $ticket['tech'] === $value) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($label); ?><?php echo empty($tech_row['active']) ? ' (inactive)' : ''; ?>
+                            </option>
                         <?php endforeach; ?>
                     </select>
                 </div>

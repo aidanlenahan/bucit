@@ -1,8 +1,8 @@
-- add filters in manage_tickets.php
 - email functionality
 - log in technician
 - milonas assignes people to computers
 - battle pass implemention as tech rewards for each marking period
-- 
+- make a chatbot or flowchart esc thing that asks the client questions about their computer in an attempt to self fix.
+- link serive number or something to dell to see if it is under warranty
 
 

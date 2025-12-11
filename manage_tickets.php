@@ -84,7 +84,7 @@ if ($priority_filter !== '' && is_numeric($priority_filter)) {
 }
 if ($search !== '') {
     $escaped = $conn->real_escape_string($search);
-    $where_clauses[] = "(id = '" . $escaped . "' OR first_name LIKE '%" . $escaped . "%' OR last_name LIKE '%" . $escaped . "%' OR school_id LIKE '%" . $escaped . "%' OR problem_category LIKE '%" . $escaped . "%' OR problem_detail LIKE '%" . $escaped . "%')";
+    $where_clauses[] = "(id = '" . $escaped . "' OR first_name LIKE '%" . $escaped . "%' OR last_name LIKE '%" . $escaped . "%' OR school_id LIKE '%" . $escaped . "%' OR problem_category LIKE '%" . $escaped . "%' OR problem_detail LIKE '%" . $escaped . "%' OR custom_detail LIKE '%" . $escaped . "%' OR status LIKE '%" . $escaped . "%')";
 }
 $where_sql = '';
 if (count($where_clauses) > 0) {
@@ -171,50 +171,77 @@ $ticket_id = $_GET['ticket_id'] ?? null;
             margin: 0;
             font-size: 28px;
         }
-        
-        .controls-wrapper {
+
+        .filter-bar {
+            margin: 25px 0 15px;
             display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .search-form {
-            display: flex;
-            gap: 6px;
+            flex-wrap: wrap;
+            gap: 12px;
             align-items: center;
             background: #f8f9fa;
-            padding: 8px 12px;
-            border-radius: 6px;
+            padding: 12px 16px;
+            border-radius: 8px;
             border: 1px solid #dee2e6;
         }
-        
-        .search-form select {
-            padding: 6px 8px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            background: white;
-            color: #333;
-            font-size: 14px;
+
+        .filter-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #555;
         }
-        
-        .search-form input[type="text"] {
+
+        .filter-field label {
+            margin: 0;
+        }
+
+        .filter-bar select,
+        .filter-bar input[type="text"] {
             padding: 6px 10px;
             border: 1px solid #ced4da;
             border-radius: 4px;
             font-size: 14px;
-            width: 250px;
+            height: 36px;
         }
-        
+
+        .filter-bar select {
+            background: white;
+            color: #333;
+        }
+
+        .filter-bar .search-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1 1 320px;
+            min-width: 260px;
+        }
+
+        .filter-bar .search-group input[type="text"] {
+            flex: 1 1 auto;
+            min-width: 200px;
+            height: 36px;
+        }
+
         .search-btn {
             background: #6c757d;
             color: white;
-            padding: 4px 10px;
+            padding: 0 10px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
             line-height: 1;
             transition: background 0.2s;
+            width: 44px;
+            min-width: 44px;
+            text-align: center;
+            flex: 0 0 44px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .search-btn:hover {
@@ -336,6 +363,20 @@ $ticket_id = $_GET['ticket_id'] ?? null;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             text-align: center;
         }
+
+        .stat-card[data-status],
+        .stat-card[data-reset] {
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+
+        .stat-card[data-status]:hover,
+        .stat-card[data-reset]:hover {
+            border-color: var(--brand);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
         
         .stat-number {
             font-size: 2rem;
@@ -359,41 +400,16 @@ $ticket_id = $_GET['ticket_id'] ?? null;
         
         <div class="header-actions">
             <h1>Support Ticket Management</h1>
-            <div class="controls-wrapper">
-                <form method="GET" class="search-form">
-                    <input type="hidden" name="sort" value="<?php echo htmlspecialchars($sort_by); ?>">
-                    <input type="hidden" name="order" value="<?php echo htmlspecialchars($order); ?>">
-                    
-                    <select name="per_page" onchange="this.form.submit()" style="width:70px">
-                        <?php foreach(['10','15','25','50','100','all'] as $opt): ?>
-                        <option value="<?php echo $opt; ?>" <?php echo ($per_page == $opt) ? 'selected': ''; ?>><?php echo ($opt=='all')? 'All' : $opt; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    
-                    <?php if ($has_priority): ?>
-                    <select name="priority" onchange="this.form.submit()" style="width:110px">
-                        <option value="">All priority</option>
-                        <option value="1" <?php echo ($priority_filter === '1')?'selected':''; ?>>1 — Urgent</option>
-                        <option value="2" <?php echo ($priority_filter === '2')?'selected':''; ?>>2 — High</option>
-                        <option value="3" <?php echo ($priority_filter === '3')?'selected':''; ?>>3 — Normal</option>
-                        <option value="4" <?php echo ($priority_filter === '4')?'selected':''; ?>>4 — Low</option>
-                    </select>
-                    <?php endif; ?>
-                    
-                    <input type="text" name="q" placeholder="Search name, ID, problem..." value="<?php echo htmlspecialchars($search); ?>">
-                    <button type="submit" class="search-btn" title="Search">🔍</button>
-                </form>
-                
-                <div class="action-btn-group">
-                    <a href="index.html" class="btn btn-success" title="Add ticket" style="padding:8px 12px; font-size:18px; line-height:1;">+</a>
-                    <?php if ($current_tech === 'jmilonas'): ?>
-                    <a href="admin_tech.php" class="btn" style="padding:8px 12px; font-size:13px;">Admin</a>
-                    <?php endif; ?>
-                    <span style="color:#666; font-size:13px; padding:0 8px;">
-                        <strong><?php echo htmlspecialchars($current_tech); ?></strong>
-                    </span>
-                    <a href="logout.php" class="btn" style="padding:8px 12px; font-size:13px;">Log out</a>
-                </div>
+            <div class="action-btn-group">
+                <a href="index.html" class="btn btn-success" title="Add ticket" style="padding:8px 12px; font-size:18px; line-height:1;">+</a>
+                <?php if ($current_tech === 'jmilonas'): ?>
+                <a href="admin_tech.php" class="btn" style="padding:8px 12px; font-size:13px;">Admin</a>
+                <?php endif; ?>
+                <a href="leaderboard.php" class="btn" style="padding:8px 12px; font-size:13px;">Bucit Ranked</a>
+                <span style="color:#666; font-size:13px; padding:0 8px;">
+                    <strong><?php echo htmlspecialchars($current_tech); ?></strong>
+                </span>
+                <a href="logout.php" class="btn" style="padding:8px 12px; font-size:13px;">Log out</a>
             </div>
         </div>
         
@@ -411,27 +427,59 @@ $ticket_id = $_GET['ticket_id'] ?? null;
         ?>
         
         <div class="stats-container">
-            <div class="stat-card">
+            <div class="stat-card" data-reset="true">
                 <div class="stat-number"><?php echo $stats['total']; ?></div>
                 <div class="stat-label">Total Tickets</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-status="Open">
                 <div class="stat-number"><?php echo $stats['open_tickets']; ?></div>
                 <div class="stat-label">Open</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-status="In Progress">
                 <div class="stat-number"><?php echo $stats['in_progress']; ?></div>
                 <div class="stat-label">In Progress</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-status="Closed">
                 <div class="stat-number"><?php echo $stats['closed']; ?></div>
                 <div class="stat-label">Closed</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-status="Delayed">
                 <div class="stat-number"><?php echo $stats['delayed_tickets']; ?></div>
                 <div class="stat-label">Delayed</div>
             </div>
         </div>
+
+        <form method="GET" id="ticket-filter-form" class="filter-bar">
+            <input type="hidden" name="sort" value="<?php echo htmlspecialchars($sort_by); ?>">
+            <input type="hidden" name="order" value="<?php echo htmlspecialchars($order); ?>">
+
+            <div class="filter-field">
+                <label for="per-page-select">Rows per page</label>
+                <select id="per-page-select" name="per_page" onchange="this.form.submit()" style="width:80px;">
+                    <?php foreach(['10','15','25','50','100','all'] as $opt): ?>
+                    <option value="<?php echo $opt; ?>" <?php echo ($per_page == $opt) ? 'selected': ''; ?>><?php echo ($opt=='all')? 'All' : $opt; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <?php if ($has_priority): ?>
+            <div class="filter-field">
+                <label for="priority-select">Priority</label>
+                <select id="priority-select" name="priority" onchange="this.form.submit()" style="width:140px;">
+                    <option value="">All</option>
+                    <option value="1" <?php echo ($priority_filter === '1')?'selected':''; ?>>1 — Urgent</option>
+                    <option value="2" <?php echo ($priority_filter === '2')?'selected':''; ?>>2 — High</option>
+                    <option value="3" <?php echo ($priority_filter === '3')?'selected':''; ?>>3 — Normal</option>
+                    <option value="4" <?php echo ($priority_filter === '4')?'selected':''; ?>>4 — Low</option>
+                </select>
+            </div>
+            <?php endif; ?>
+
+            <div class="search-group">
+                <input id="search-input" type="text" name="q" placeholder="Search name, ID, problem..." value="<?php echo htmlspecialchars($search); ?>">
+                <button type="submit" class="search-btn" title="Search">🔍</button>
+            </div>
+        </form>
         
         <?php if ($result && $result->num_rows > 0): ?>
         <table class="tickets-table">
@@ -569,6 +617,29 @@ $ticket_id = $_GET['ticket_id'] ?? null;
         function viewTicket(ticketId) {
             window.location.href = `edit_ticket.php?id=${ticketId}`;
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const statCards = document.querySelectorAll('.stat-card[data-status], .stat-card[data-reset]');
+            const searchInput = document.getElementById('search-input');
+            const filterForm = document.getElementById('ticket-filter-form');
+
+            if (!searchInput || !filterForm) {
+                return;
+            }
+
+            statCards.forEach(function(card) {
+                card.addEventListener('click', function() {
+                    if (card.dataset.reset !== undefined) {
+                        searchInput.value = '';
+                    } else if (card.dataset.status) {
+                        searchInput.value = card.dataset.status.toUpperCase();
+                    } else {
+                        return;
+                    }
+                    filterForm.submit();
+                });
+            });
+        });
     </script>
 </body>
 </html>
