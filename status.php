@@ -46,11 +46,17 @@ if ($ticketId !== '') {
 body{ background: var(--brand); color:#fff; }
 .container{ max-width: 720px; margin: 48px auto; background: rgba(255,255,255,0.98); padding: 24px; border-radius: 8px; color:#222; }
 .ticket-box{ padding: 12px; border-radius: 8px; border: 1px solid #ddd; background:#fff; }
+.container-header{ display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.new-ticket-btn{ background:var(--brand); color:#fff; text-decoration:none; padding:10px 16px; border-radius:6px; font-weight:600; border:1px solid #5a0000; }
+.new-ticket-btn:hover{ background:#5a0000; }
 </style>
 </head>
 <body>
     <div class="container">
-        <h1>Check your ticket</h1>
+        <div class="container-header">
+            <h1 style="margin:0;">Check your ticket</h1>
+            <a class="new-ticket-btn" href="index.html">+ New Ticket</a>
+        </div>
         <p>Enter your ticket ID to check the status and updates.</p>
         <form method="GET">
             <label for="id">Ticket ID</label>
