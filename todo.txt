@@ -1,8 +1,19 @@
-- email functionality
+- 
 - log in technician
 - milonas assignes people to computers
 - battle pass implemention as tech rewards for each marking period
 - make a chatbot or flowchart esc thing that asks the client questions about their computer in an attempt to self fix.
+-
+
+
+
+
+- email functionality
+- access for Barry and front desk lady
+- chatbot to walk people through self fixes
+- loaner system
+- print tickets
+- mark as picked up
+- Make it so you can see admin notes in status page
+- inventory system
 - link serive number or something to dell to see if it is under warranty
-
-
