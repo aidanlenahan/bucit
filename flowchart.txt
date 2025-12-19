@@ -1,0 +1,69 @@
+FLOWCHART:
+
+Problems:
+- Screen Not Working
+    - Cracked
+        - Refer to form
+    - Black Screen
+        - Refer to form
+    - Flickering display
+        - Refer to form
+    - Something else (now go to "Something else" flowchart section)
+- Battery Issue
+    - Dies quickly
+        - Did you leave the computer plugged in?
+            - No: Please charge the computer and submit a ticket if this issue persists.
+            - Yes: Has this problem occurred for more than 2 weeks consistently?
+                - Yes: <refer user to ticket submission page>
+                - No: Please submit a ticket after this issue has occured for at least 2 weeks.
+                    - Buttons: End Chat, Restart Chat, Submit Ticket
+    - Does not charge
+        - Did you leave the computer plugged in?
+            - No: Please charge the computer and submit a ticket if this issue persists.
+            - Yes: Has this problem occurred for more than 2 weeks consistently?
+                - Yes: <refer user to ticket submission page>
+                - No: Please submit a ticket after this issue has occured for at least 2 weeks.
+                    - Buttons: End Chat, Restart Chat, Submit Ticket
+    - Something else (now go to "Something else" flowchart section)
+- Keyboard Not Working
+    - Key(s) stuck
+        - Have you tried cleaning the keyboard?
+            - Yes: <refer user to ticket submission page>
+            - No: Please refer to this article on how to clean the keyboard before submitting a ticket.
+                - Buttons: End Chat, Restart Chat, Submit Ticket
+    - Keys Not Registering
+        - Did you try to turn the computer off and turn it back on again?
+            - No: Please attempt to restart the computer and submit a ticket if this issue persists.
+                - Buttons: End Chat, Restart Chat, Submit Ticket
+            - Yes: <refer user to ticket submission page>
+    - Keys missing
+        - <refer user to ticket submission page>
+    - Something else (now go to "Something else" flowchart section)
+- WiFi Connectivity Issues
+    - Are you connected to a WiFi network? Refer to this article on how to check.
+        - No: See this article on how to connect to a WiFi network before submitting a ticket.
+        - Yes: Did you try to turn the computer off and turn it back on again?
+            - Yes: <refer user to ticket submission page>
+            - No: Please attempt to restart the computer and submit a ticket if this issue persists.
+                - Buttons: End Chat, Restart Chat, Submit Ticket
+- Can't log in
+    - Are you connected to a WiFi network? Refer to this article on how to check.
+        - No: See this article on how to connect to a WiFi network before submitting a ticket.
+        - Yes: Did you try to turn the computer off and turn it back on again?
+            - Yes: <refer user to ticket submission page>
+            - No: Please attempt to restart the computer and submit a ticket if this issue persists.
+                - Buttons: End Chat, Restart Chat, Submit Ticket
+
+
+- Something else:
+    - Is the computer charged?
+        - No: Please charge the computer and submit a ticket if this issue persists.
+            - Buttons: End Chat, Restart Chat, Submit Ticket
+        - Yes: Did you leave the computer charging for awhile?
+            - No: Please charge the computer and submit a ticket if this issue persists.
+                - Buttons: End Chat, Restart Chat, Submit Ticket
+            - Yes: Did you try to turn the computer off and turn it back on again?
+                - My computer won't turn on: <refer user to ticket submission page>
+                - Yes: <refer user to ticket submission page>
+                - No: Please attempt to restart the computer and submit a ticket if this issue persists.
+                    - Buttons: End Chat, Restart Chat, Submit Ticket
