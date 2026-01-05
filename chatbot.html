@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chromebook Tech Support Chatbot</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    main {
+      width: 600px;
+      max-width: 90%;
+      margin-top: 20px;
+    }
+
+    #chat-container {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      min-height: 400px;
+      max-height: 600px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+
+    .message {
+      margin: 12px 0;
+      padding: 12px 16px;
+      border-radius: 8px;
+      max-width: 80%;
+    }
+
+    .bot-message {
+      background: #e8e8e8;
+      color: #222;
+      margin-right: auto;
+    }
+
+    .user-message {
+      background: var(--brand);
+      color: #fff;
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .option-btn {
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.2s;
+      text-align: left;
+    }
+
+    .option-btn:hover {
+      background: var(--brand-dark);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .action-btn {
+      background: #555;
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95em;
+      transition: background 0.2s;
+    }
+
+    .action-btn:hover {
+      background: #333;
+    }
+
+    .submit-btn {
+      background: var(--brand);
+    }
+
+    .submit-btn:hover {
+      background: var(--brand-dark);
+    }
+
+    .link-text {
+      color: var(--brand);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <nav style="background: #5a0000; padding: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; align-items: center; padding: 0 20px;">
+      <a href="index.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Intake Form</a>
+      <a href="status.php" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Ticket Status</a>
+      <a href="chatbot.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; background: rgba(255,255,255,0.15);">Chatbot</a>
+    </div>
+  </nav>
+  <main>
+    <h2>Chromebook Tech Support Chatbot</h2>
+    <div id="chat-container"></div>
+  </main>
+
+  <script>
+    const chatContainer = document.getElementById('chat-container');
+    let conversationHistory = [];
+
+    function addMessage(text, isBot = true) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isBot ? 'bot-message' : 'user-message'}`;
+      messageDiv.innerHTML = text;
+      chatContainer.appendChild(messageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function addOptions(options, callback) {
+      const optionsDiv = document.createElement('div');
+      optionsDiv.className = 'options';
+      
+      options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = option.text;
+        btn.onclick = () => {
+          addMessage(option.text, false);
+          optionsDiv.remove();
+          callback(option.action);
+        };
+        optionsDiv.appendChild(btn);
+      });
+      
+      chatContainer.appendChild(optionsDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function addActionButtons() {
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'action-buttons';
+      
+      const endBtn = document.createElement('button');
+      endBtn.className = 'action-btn';
+      endBtn.textContent = 'End Chat';
+      endBtn.onclick = () => {
+        addMessage('Thank you for using our chatbot. Have a great day!');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+      };
+      
+      const restartBtn = document.createElement('button');
+      restartBtn.className = 'action-btn';
+      restartBtn.textContent = 'Restart Chat';
+      restartBtn.onclick = () => {
+        chatContainer.innerHTML = '';
+        startChat();
+      };
+      
+      const submitBtn = document.createElement('button');
+      submitBtn.className = 'action-btn submit-btn';
+      submitBtn.textContent = 'Submit Ticket';
+      submitBtn.onclick = () => {
+        window.location.href = 'index.html';
+      };
+      
+      actionsDiv.appendChild(endBtn);
+      actionsDiv.appendChild(restartBtn);
+      actionsDiv.appendChild(submitBtn);
+      
+      chatContainer.appendChild(actionsDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function referToTicket() {
+      addMessage('Please submit a support ticket so our technicians can assist you further. Click the "Submit Ticket" button below.');
+      addActionButtons();
+    }
+
+    function handleScreenIssue() {
+      addMessage('What type of screen issue are you experiencing?');
+      addOptions([
+        { text: 'Cracked screen', action: 'cracked' },
+        { text: 'Black screen', action: 'black' },
+        { text: 'Flickering display', action: 'flickering' },
+        { text: 'Something else', action: 'something-else' }
+      ], (action) => {
+        if (action === 'something-else') {
+          handleSomethingElse();
+        } else {
+          referToTicket();
+        }
+      });
+    }
+
+    function handleBatteryIssue() {
+      addMessage('What kind of battery issue are you having?');
+      addOptions([
+        { text: 'Battery dies quickly', action: 'dies-quickly' },
+        { text: 'Does not charge', action: 'no-charge' },
+        { text: 'Something else', action: 'something-else' }
+      ], (action) => {
+        if (action === 'something-else') {
+          handleSomethingElse();
+        } else {
+          handleBatteryFlow();
+        }
+      });
+    }
+
+    function handleBatteryFlow() {
+      addMessage('Did you leave the computer plugged in?');
+      addOptions([
+        { text: 'Yes', action: 'yes' },
+        { text: 'No', action: 'no' }
+      ], (action) => {
+        if (action === 'no') {
+          addMessage('Please charge the computer and submit a ticket if this issue persists.');
+          addActionButtons();
+        } else {
+          addMessage('Has this problem occurred for more than 2 weeks consistently?');
+          addOptions([
+            { text: 'Yes', action: 'yes' },
+            { text: 'No', action: 'no' }
+          ], (twoWeeks) => {
+            if (twoWeeks === 'yes') {
+              referToTicket();
+            } else {
+              addMessage('Please submit a ticket after this issue has occurred for at least 2 weeks.');
+              addActionButtons();
+            }
+          });
+        }
+      });
+    }
+
+    function handleKeyboardIssue() {
+      addMessage('What\'s wrong with the keyboard?');
+      addOptions([
+        { text: 'Key(s) stuck', action: 'stuck' },
+        { text: 'Keys not registering', action: 'not-registering' },
+        { text: 'Keys missing', action: 'missing' },
+        { text: 'Something else', action: 'something-else' }
+      ], (action) => {
+        if (action === 'something-else') {
+          handleSomethingElse();
+        } else if (action === 'missing') {
+          referToTicket();
+        } else if (action === 'stuck') {
+          addMessage('Have you tried cleaning the keyboard?');
+          addOptions([
+            { text: 'Yes', action: 'yes' },
+            { text: 'No', action: 'no' }
+          ], (cleaned) => {
+            if (cleaned === 'yes') {
+              referToTicket();
+            } else {
+              addMessage('Please refer to <span class="link-text">this article</span> on how to clean the keyboard before submitting a ticket.');
+              addActionButtons();
+            }
+          });
+        } else if (action === 'not-registering') {
+          addMessage('Did you try to turn the computer off and turn it back on again?');
+          addOptions([
+            { text: 'Yes', action: 'yes' },
+            { text: 'No', action: 'no' }
+          ], (restarted) => {
+            if (restarted === 'yes') {
+              referToTicket();
+            } else {
+              addMessage('Please attempt to restart the computer and submit a ticket if this issue persists.');
+              addActionButtons();
+            }
+          });
+        }
+      });
+    }
+
+    function handleWifiIssue() {
+      addMessage('Are you connected to a WiFi network? <span class="link-text">Refer to this article</span> on how to check.');
+      addOptions([
+        { text: 'Yes', action: 'yes' },
+        { text: 'No', action: 'no' }
+      ], (connected) => {
+        if (connected === 'no') {
+          addMessage('See <span class="link-text">this article</span> on how to connect to a WiFi network before submitting a ticket.');
+          addActionButtons();
+        } else {
+          addMessage('Did you try to turn the computer off and turn it back on again?');
+          addOptions([
+            { text: 'Yes', action: 'yes' },
+            { text: 'No', action: 'no' }
+          ], (restarted) => {
+            if (restarted === 'yes') {
+              referToTicket();
+            } else {
+              addMessage('Please attempt to restart the computer and submit a ticket if this issue persists.');
+              addActionButtons();
+            }
+          });
+        }
+      });
+    }
+
+    function handleLoginIssue() {
+      addMessage('Are you connected to a WiFi network? <span class="link-text">Refer to this article</span> on how to check.');
+      addOptions([
+        { text: 'Yes', action: 'yes' },
+        { text: 'No', action: 'no' }
+      ], (connected) => {
+        if (connected === 'no') {
+          addMessage('See <span class="link-text">this article</span> on how to connect to a WiFi network before submitting a ticket.');
+          addActionButtons();
+        } else {
+          addMessage('Did you try to turn the computer off and turn it back on again?');
+          addOptions([
+            { text: 'Yes', action: 'yes' },
+            { text: 'No', action: 'no' }
+          ], (restarted) => {
+            if (restarted === 'yes') {
+              referToTicket();
+            } else {
+              addMessage('Please attempt to restart the computer and submit a ticket if this issue persists.');
+              addActionButtons();
+            }
+          });
+        }
+      });
+    }
+
+    function handleSomethingElse() {
+      addMessage('Is the computer charged?');
+      addOptions([
+        { text: 'Yes', action: 'yes' },
+        { text: 'No', action: 'no' }
+      ], (charged) => {
+        if (charged === 'no') {
+          addMessage('Please charge the computer and submit a ticket if this issue persists.');
+          addActionButtons();
+        } else {
+          addMessage('Did you leave the computer charging for awhile?');
+          addOptions([
+            { text: 'Yes', action: 'yes' },
+            { text: 'No', action: 'no' }
+          ], (chargingAwhile) => {
+            if (chargingAwhile === 'no') {
+              addMessage('Please charge the computer and submit a ticket if this issue persists.');
+              addActionButtons();
+            } else {
+              addMessage('Did you try to turn the computer off and turn it back on again?');
+              addOptions([
+                { text: 'Yes', action: 'yes' },
+                { text: 'No', action: 'no' },
+                { text: 'My computer won\'t turn on', action: 'wont-turn-on' }
+              ], (restarted) => {
+                if (restarted === 'yes' || restarted === 'wont-turn-on') {
+                  referToTicket();
+                } else {
+                  addMessage('Please attempt to restart the computer and submit a ticket if this issue persists.');
+                  addActionButtons();
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+
+    function startChat() {
+      addMessage('Hello! I\'m here to help you with your Chromebook issues. What problem are you experiencing?');
+      
+      addOptions([
+        { text: 'Screen not working', action: 'screen' },
+        { text: 'Battery issue', action: 'battery' },
+        { text: 'Keyboard not working', action: 'keyboard' },
+        { text: 'WiFi connectivity issues', action: 'wifi' },
+        { text: 'Can\'t log in', action: 'login' },
+        { text: 'Something else', action: 'something-else' }
+      ], (action) => {
+        switch(action) {
+          case 'screen':
+            handleScreenIssue();
+            break;
+          case 'battery':
+            handleBatteryIssue();
+            break;
+          case 'keyboard':
+            handleKeyboardIssue();
+            break;
+          case 'wifi':
+            handleWifiIssue();
+            break;
+          case 'login':
+            handleLoginIssue();
+            break;
+          case 'something-else':
+            handleSomethingElse();
+            break;
+        }
+      });
+    }
+
+    // Start the chat when page loads
+    startChat();
+  </script>
+</body>
+</html>

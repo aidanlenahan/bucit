@@ -44,6 +44,11 @@ if ($ticketId !== '') {
 <style>
 :root{ --brand: #800000; }
 body{ background: var(--brand); color:#fff; }
+nav{ background: #5a0000; padding: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+nav div{ max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; align-items: center; padding: 0 20px; }
+nav a{ color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s; }
+nav a:hover{ background: rgba(255,255,255,0.1); }
+nav a.active{ background: rgba(255,255,255,0.15); }
 .container{ max-width: 720px; margin: 48px auto; background: rgba(255,255,255,0.98); padding: 24px; border-radius: 8px; color:#222; }
 .ticket-box{ padding: 12px; border-radius: 8px; border: 1px solid #ddd; background:#fff; }
 .container-header{ display:flex; justify-content:space-between; align-items:center; gap:12px; }
@@ -51,8 +56,13 @@ body{ background: var(--brand); color:#fff; }
 .new-ticket-btn:hover{ background:#5a0000; }
 </style>
 </head>
-<body>
-    <div class="container">
+<body><nav>
+  <div>
+    <a href="index.html">Intake Form</a>
+    <a href="status.php" class="active">Ticket Status</a>
+    <a href="chatbot.html">Chatbot</a>
+  </div>
+</nav>    <div class="container">
         <div class="container-header">
             <h1 style="margin:0;">Check your ticket</h1>
             <a class="new-ticket-btn" href="index.html">+ New Ticket</a>
