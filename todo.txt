@@ -1,7 +1,4 @@
 - 
-- log in technician
-- milonas assignes people to computers
-- battle pass implemention as tech rewards for each marking period
 - make a chatbot or flowchart esc thing that asks the client questions about their computer in an attempt to self fix.
 -
 
@@ -17,3 +14,8 @@
 - Make it so you can see admin notes in status page
 - inventory system
 - link serive number or something to dell to see if it is under warranty
+- Spanish Translation
+- Navigation Bar for the front end (Ticket status viewing, form submission)
+- Make wifi connectivity article
+- Restarting computer article
+- cleaning keys/computer article
