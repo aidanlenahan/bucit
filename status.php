@@ -61,6 +61,7 @@ nav a.active{ background: rgba(255,255,255,0.15); }
     <a href="index.html">Intake Form</a>
     <a href="status.php" class="active">Ticket Status</a>
     <a href="chatbot.html">Chatbot</a>
+    <a href="articles/index.html">Articles</a>
   </div>
 </nav>    <div class="container">
         <div class="container-header">

@@ -1,5 +1,15 @@
 :root { --brand: #800000; --brand-dark: #5a0000; --card-bg: rgba(255,255,255,0.98); }
 
+html {
+  scroll-padding-top: 60px;
+}
+
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
 body {
   font-family: Arial, sans-serif;
   background: var(--brand);
