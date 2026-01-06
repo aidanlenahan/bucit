@@ -1,0 +1,203 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Display Issues - Help Articles</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #800000, #3d0000);
+      min-height: 100vh;
+    }
+
+    .article-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 40px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      color: #222;
+    }
+
+    .breadcrumb {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .breadcrumb a {
+      color: var(--brand);
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .article-header {
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    .article-header h1 {
+      color: var(--brand);
+      margin: 0 0 10px 0;
+      font-size: 2.5rem;
+    }
+
+    .article-meta {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .article-content {
+      line-height: 1.8;
+    }
+
+    .article-content h2 {
+      color: var(--brand);
+      margin-top: 35px;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
+
+    .article-content h3 {
+      color: #444;
+      margin-top: 20px;
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+    }
+
+    .article-content p {
+      margin-bottom: 15px;
+    }
+
+    .article-content ol,
+    .article-content ul {
+      margin-bottom: 20px;
+      padding-left: 25px;
+    }
+
+    .article-content li {
+      margin-bottom: 8px;
+    }
+
+    .article-content a {
+      color: var(--brand);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .article-content a:hover {
+      text-decoration: underline;
+    }
+
+    .info-box {
+      background: #d1ecf1;
+      border-left: 4px solid #17a2b8;
+      padding: 15px 20px;
+      margin: 25px 0;
+      border-radius: 4px;
+    }
+
+    .info-box strong {
+      color: #0c5460;
+    }
+
+    .back-button {
+      display: inline-block;
+      background: #800000 !important;
+      color: white !important;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      margin-top: 30px;
+      transition: background 0.2s;
+    }
+
+    .back-button:hover {
+      background: #5a0000 !important;
+    }
+
+    @media (max-width: 768px) {
+      .article-container {
+        margin: 20px;
+        padding: 25px;
+      }
+
+      .article-header h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav style="position: sticky; top: 0; z-index: 1000; background: #5a0000; padding: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; align-items: center; padding: 0 20px;">
+      <a href="../index.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Intake Form</a>
+      <a href="../status.php" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Ticket Status</a>
+      <a href="../chatbot.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Chatbot</a>
+      <a href="index.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; background: rgba(255,255,255,0.15);">Articles</a>
+    </div>
+  </nav>
+
+  <div class="article-container">
+    <div class="breadcrumb">
+      <a href="index.html">Help Articles</a> / <a href="index.html#display">Display Issues</a> / Troubleshooting
+    </div>
+
+    <div class="article-header">
+      <h1>Display Issues</h1>
+      <div class="article-meta">Category: Display Issues</div>
+    </div>
+
+    <div class="article-content">
+      <p>Having trouble with your Chromebook's display? Try these simple troubleshooting steps for common screen problems.</p>
+
+      <h2>Black Screen</h2>
+      
+      <h3>What to Try:</h3>
+      <ol>
+        <li>Press the brightness up key several times (sun icon with rays pointing out)</li>
+        <li>Press any key or click the touchpad to wake the screen</li>
+        <li>Close and reopen the lid</li>
+        <li>Hold the power button for 10 seconds to turn off, then press it again to turn on</li>
+        <li>Try a hard reset: Hold Refresh key + press Power button</li>
+      </ol>
+
+      <h2>Screen Flickering</h2>
+      
+      <h3>What to Try:</h3>
+      <ol>
+        <li>Restart your Chromebook</li>
+        <li>Adjust the screen to a different angle</li>
+        <li>Check if it happens in specific apps or everywhere</li>
+        <li>Try disabling any Chrome extensions</li>
+        <li>Update Chrome OS: Settings > About ChromeOS > Check for updates</li>
+      </ol>
+
+      <h2>Brightness Not Adjusting</h2>
+      
+      <h3>What to Try:</h3>
+      <ol>
+        <li>Look for the brightness keys (sun icons) in the top row of your keyboard</li>
+        <li>Try clicking the time > Settings > Display to adjust brightness manually</li>
+        <li>Restart your Chromebook</li>
+        <li>Check if auto-brightness is enabled: Settings > Display > Adaptive brightness</li>
+      </ol>
+
+      <div class="info-box">
+        <strong>Quick Tip:</strong> For a hard reset, press and hold the Refresh key (circular arrow in top row), then press the Power button once while still holding Refresh.
+      </div>
+
+      <h2>Still Not Working?</h2>
+      <p>If you've tried these steps and your issue isn't resolved, please submit a support ticket using our <a href="../index.html">intake form</a>. Include what you've already tried and describe exactly what's happening with your screen.</p>
+
+      <a href="index.html" class="back-button">Back to All Articles</a>
+    </div>
+  </div>
+</body>
+</html>
