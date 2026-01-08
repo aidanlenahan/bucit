@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chromebook Tech Support Ticket</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav style="background: #5a0000; padding: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; align-items: center; padding: 0 20px;">
+      <a href="index.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Home</a>
+      <a href="form.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; background: rgba(255,255,255,0.15);">Intake Form</a>
+      <a href="status.php" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Ticket Status</a>
+      <a href="chatbot.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Chatbot</a>
+      <a href="articles/index.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Articles</a>
+    </div>
+  </nav>
+  <main>
+    <h2>Chromebook Tech Support Ticket</h2>
+  <form id="supportForm" method="POST" action="support_ticket.php">
+      <label for="problem">Problem:</label>
+      <select id="problem" name="problem" required>
+        <option value="" disabled selected>Select a problem</option>
+        <option value="screen">Screen not working</option>
+        <option value="battery">Battery issue</option>
+        <option value="keyboard">Keyboard not working</option>
+        <option value="wifi">WiFi connectivity</option>
+        <option value="login">Can’t log in</option>
+        <option value="other">Other</option>
+      </select>
+
+      <div id="secondary-container"></div>
+
+      <div class="form-group" style="margin-top:12px;">
+        <label for="restarted">Have you restarted the computer?</label>
+        <select id="restarted" name="restarted">
+          <option value="no" selected>No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+
+      <label for="schoolEmail">School Email:</label>
+      <input 
+        type="email" 
+        id="schoolEmail" 
+        name="schoolEmail" 
+        required
+        placeholder="yourname@school.edu"
+        title="Enter a valid email address"
+      >
+
+      <label for="additionalInfo">Additional Information:</label>
+      <textarea 
+        id="additionalInfo" 
+        name="additionalInfo"
+        maxlength="120"
+        rows="3"
+        placeholder="Any additional details about your issue (max 120 characters)"
+      ></textarea>
+
+      <label for="classOf">Class of:</label>
+      <input 
+        type="text" 
+        id="classOf" 
+        name="classOf"
+        pattern="\d{1,4}"
+        maxlength="4"
+        inputmode="numeric"
+        title="Numbers only (up to 4 digits)"
+      >
+
+
+
+      <label for="schoolId">School ID #:</label>
+      <input 
+        type="text" 
+        id="schoolId" 
+        name="schoolId" 
+        required 
+        pattern="\d{6}" 
+        maxlength="6" 
+        minlength="6" 
+        inputmode="numeric"
+        title="Enter a 6-digit ID"
+      >
+
+      <label for="lastName">Last Name:</label>
+      <input type="text" id="lastName" name="lastName" required>
+
+      <label for="firstName">First Name:</label>
+      <input type="text" id="firstName" name="firstName" required>
+
+      <button type="submit">Submit Ticket</button>
+    </form>
+  </main>
+<!--
+  <div id="chatbot-container">
+    <div id="chatbot-header">🤖 Chatbot</div>
+    <div id="chatbot-messages"></div>
+    <form id="chatbot-form">
+      <input type="text" id="chatbot-input" placeholder="Type a message..." autocomplete="off">
+      <button type="submit">Send</button>
+    </form>
+  </div>
+-->
+  <script src="script.js"></script>
+</body>
+</html>

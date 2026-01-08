@@ -58,7 +58,8 @@ nav a.active{ background: rgba(255,255,255,0.15); }
 </head>
 <body><nav>
   <div>
-    <a href="index.html">Intake Form</a>
+    <a href="index.html">Home</a>
+    <a href="form.html">Intake Form</a>
     <a href="status.php" class="active">Ticket Status</a>
     <a href="chatbot.html">Chatbot</a>
     <a href="articles/index.html">Articles</a>
@@ -66,7 +67,7 @@ nav a.active{ background: rgba(255,255,255,0.15); }
 </nav>    <div class="container">
         <div class="container-header">
             <h1 style="margin:0;">Check your ticket</h1>
-            <a class="new-ticket-btn" href="index.html">+ New Ticket</a>
+            <a class="new-ticket-btn" href="form.html">+ New Ticket</a>
         </div>
         <p>Enter your ticket ID to check the status and updates.</p>
         <form method="GET">
@@ -84,7 +85,7 @@ nav a.active{ background: rgba(255,255,255,0.15); }
             <?php if (!empty($ticket['custom_detail'])): ?><p><strong>Details:</strong> <?php echo htmlspecialchars($ticket['custom_detail']); ?></p><?php endif; ?>
             <?php if (!empty($ticket['notes'])): ?><p><strong>Notes:</strong> <?php echo nl2br(htmlspecialchars($ticket['notes'])); ?></p><?php endif; ?>
             <?php if (!empty($ticket['priority'])): ?><p><strong>Priority:</strong> <?php echo htmlspecialchars($ticket['priority']); ?></p><?php endif; ?>
-            <p><a href="index.html">Submit a new ticket</a></p>
+            <p><a href="form.html">Submit a new ticket</a></p>
         </div>
         <?php elseif ($notFound): ?>
         <div style="margin-top: 20px;" class="ticket-box">No ticket found with ID <?php echo htmlspecialchars($ticketId); ?></div>

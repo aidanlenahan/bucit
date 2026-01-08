@@ -20,7 +20,8 @@ $firstName = $_POST['firstName'] ?? '';
 $lastName = $_POST['lastName'] ?? '';
 $schoolId = $_POST['schoolId'] ?? '';
 $classOf = $_POST['classOf'] ?? '';
-$phone = $_POST['phone'] ?? '';
+$schoolEmail = $_POST['schoolEmail'] ?? '';
+$additionalInfo = $_POST['additionalInfo'] ?? '';
 $date = date('Y-m-d'); // set report date to server submission date
 $problem = $_POST['problem'] ?? '';
 $subproblem = $_POST['subproblem'] ?? null;
@@ -31,9 +32,9 @@ $restarted = (isset($_POST['restarted']) && $_POST['restarted'] === 'yes') ? 1 :
 // Prepare SQL statement
 $stmt = $conn->prepare(
   "INSERT INTO tickets (
-    first_name, last_name, school_id, class_of, phone, date_reported,
+    first_name, last_name, school_id, class_of, school_email, additional_info, date_reported,
     problem_category, problem_detail, custom_detail, restarted
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 );
 
 if (!$stmt) {
@@ -43,12 +44,13 @@ if (!$stmt) {
 }
 
 $bind = $stmt->bind_param(
-  "sssssssssi",
+  "ssssssssssi",
   $firstName,
   $lastName,
   $schoolId,
   $classOf,
-  $phone,
+  $schoolEmail,
+  $additionalInfo,
   $date,
   $problem,
   $subproblem,

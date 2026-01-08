@@ -28,7 +28,7 @@ body{ background: var(--brand); color:#fff; min-height:100vh; }
   <?php endif; ?>
 
   <p><a class="primary-action" href="status.php">Check Ticket Status</a>
-  <a class="secondary" href="index.html">Submit Another Ticket</a></p>
+  <a class="secondary" href="form.html">Submit Another Ticket</a></p>
 
   <hr>
   <p style="font-size:0.95rem; color:#555;">This is the customer-facing confirmation. If you are a technician, <a href="manage_tickets.php">open the management dashboard</a> to view and manage tickets.</p>

@@ -170,11 +170,111 @@ if ($tech_query && $tech_query->num_rows > 0) {
     }
 }
 
+// Load available inventory parts
+$inventory_parts = [];
+$inventory_query = $conn->query("SELECT id, part_name, part_number, quantity FROM inventory WHERE quantity > 0 ORDER BY part_name ASC");
+if ($inventory_query && $inventory_query->num_rows > 0) {
+    while ($row = $inventory_query->fetch_assoc()) {
+        $inventory_parts[] = $row;
+    }
+}
+
+// Load parts already attached to this ticket
+$attached_parts = [];
+$attached_query = $conn->prepare("SELECT tp.id, tp.part_id, tp.quantity_used, i.part_name, i.part_number FROM ticket_parts tp JOIN inventory i ON tp.part_id = i.id WHERE tp.ticket_id = ?");
+if ($attached_query) {
+    $attached_query->bind_param('i', $ticket_id);
+    $attached_query->execute();
+    $result = $attached_query->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $attached_parts[] = $row;
+    }
+    $attached_query->close();
+}
+
 
 // Handle form submission for updates
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Handle parts attachment/removal
+    if (isset($_POST['attach_parts'])) {
+        $selected_parts = $_POST['parts'] ?? [];
+        $part_quantities = $_POST['part_quantities'] ?? [];
+        
+        if (!empty($selected_parts)) {
+            // Begin transaction for inventory safety
+            $conn->begin_transaction();
+            
+            try {
+                foreach ($selected_parts as $part_id) {
+                    $part_id = intval($part_id);
+                    $quantity = isset($part_quantities[$part_id]) ? intval($part_quantities[$part_id]) : 1;
+                    
+                    if ($quantity < 1) $quantity = 1;
+                    
+                    // Check if sufficient inventory exists
+                    $check = $conn->prepare("SELECT quantity FROM inventory WHERE id = ?");
+                    $check->bind_param('i', $part_id);
+                    $check->execute();
+                    $result = $check->get_result();
+                    $check->close();
+                    
+                    if ($result->num_rows == 0) {
+                        throw new Exception("Part not found");
+                    }
+                    
+                    $part = $result->fetch_assoc();
+                    if ($part['quantity'] < $quantity) {
+                        throw new Exception("Insufficient inventory for selected part");
+                    }
+                    
+                    // Check if part already attached to avoid duplicates
+                    $existing = $conn->prepare("SELECT id FROM ticket_parts WHERE ticket_id = ? AND part_id = ?");
+                    $existing->bind_param('ii', $ticket_id, $part_id);
+                    $existing->execute();
+                    $existing_result = $existing->get_result();
+                    $existing->close();
+                    
+                    if ($existing_result->num_rows > 0) {
+                        continue; // Skip if already attached
+                    }
+                    
+                    // Attach part to ticket
+                    $attach = $conn->prepare("INSERT INTO ticket_parts (ticket_id, part_id, quantity_used, added_by) VALUES (?, ?, ?, ?)");
+                    $attach->bind_param('iiis', $ticket_id, $part_id, $quantity, $current_tech);
+                    $attach->execute();
+                    $attach->close();
+                    
+                    // Deduct from inventory
+                    $deduct = $conn->prepare("UPDATE inventory SET quantity = quantity - ? WHERE id = ?");
+                    $deduct->bind_param('ii', $quantity, $part_id);
+                    $deduct->execute();
+                    $deduct->close();
+                }
+                
+                $conn->commit();
+                $success_message = "Parts attached successfully and inventory updated!";
+                
+                // Reload attached parts
+                $attached_parts = [];
+                $attached_query = $conn->prepare("SELECT tp.id, tp.part_id, tp.quantity_used, i.part_name, i.part_number FROM ticket_parts tp JOIN inventory i ON tp.part_id = i.id WHERE tp.ticket_id = ?");
+                if ($attached_query) {
+                    $attached_query->bind_param('i', $ticket_id);
+                    $attached_query->execute();
+                    $result = $attached_query->get_result();
+                    while ($row = $result->fetch_assoc()) {
+                        $attached_parts[] = $row;
+                    }
+                    $attached_query->close();
+                }
+                
+            } catch (Exception $e) {
+                $conn->rollback();
+                $error_message = "Error attaching parts: " . $e->getMessage();
+            }
+        }
+    }
     // If this is a pickup action, only update status and tech (preserve all other fields)
-    if (isset($_POST['pickup'])) {
+    elseif (isset($_POST['pickup'])) {
         if (empty($current_tech)) {
             $error_message = 'You must be logged in to pick up a ticket.';
         } else {
@@ -232,7 +332,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $lastName = trim($_POST['last_name'] ?? '');
         $schoolId = trim($_POST['school_id'] ?? '');
         $classOf = trim($_POST['class_of'] ?? '');
-        $phone = trim($_POST['phone'] ?? '');
+        $schoolEmail = trim($_POST['school_email'] ?? '');
+        $additionalInfo = trim($_POST['additional_info'] ?? '');
         $dateReported = $_POST['date_reported'] ?? '';
         $problemCategory = $_POST['problem_category'] ?? '';
         $problemDetail = trim($_POST['problem_detail'] ?? '');
@@ -261,11 +362,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Build dynamic UPDATE depending on which optional columns exist
         $fields = [
             'status = ?', 'notes = ?', 'first_name = ?', 'last_name = ?',
-            'school_id = ?', 'class_of = ?', 'phone = ?', 'date_reported = ?',
+            'school_id = ?', 'class_of = ?', 'school_email = ?', 'additional_info = ?', 'date_reported = ?',
             'problem_category = ?', 'problem_detail = ?', 'custom_detail = ?'
         ];
         $params = [
-            $status, $notes, $firstName, $lastName, $schoolId, $classOf, $phone, $dateReported, $problemCategory, $problemDetail, $customDetail
+            $status, $notes, $firstName, $lastName, $schoolId, $classOf, $schoolEmail, $additionalInfo, $dateReported, $problemCategory, $problemDetail, $customDetail
         ];
         $types = str_repeat('s', count($params));
 
@@ -564,8 +665,8 @@ $stmt->close();
                 </div>
                 
                 <div class="detail-item">
-                    <div class="detail-label">Phone</div>
-                    <div class="detail-value"><?php echo htmlspecialchars($ticket['phone']); ?></div>
+                    <div class="detail-label">School Email</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($ticket['school_email'] ?? ''); ?></div>
                 </div>
                 
                 <div class="detail-item">
@@ -609,6 +710,13 @@ $stmt->close();
                 </div>
                 <?php endif; ?>
                 
+                <?php if ($ticket['additional_info']): ?>
+                <div class="detail-item" style="grid-column: 1 / -1;">
+                    <div class="detail-label">Additional Information</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($ticket['additional_info']); ?></div>
+                </div>
+                <?php endif; ?>
+                
                 <?php if ($ticket['notes']): ?>
                 <div class="detail-item" style="grid-column: 1 / -1;">
                     <div class="detail-label">Admin Notes</div>
@@ -649,8 +757,13 @@ $stmt->close();
                 </div>
 
                 <div class="form-group">
-                    <label for="phone">Phone</label>
-                    <input id="phone" name="phone" value="<?php echo htmlspecialchars($ticket['phone'] ?? ''); ?>">
+                    <label for="school_email">School Email</label>
+                    <input type="email" id="school_email" name="school_email" value="<?php echo htmlspecialchars($ticket['school_email'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="additional_info">Additional Information</label>
+                    <textarea id="additional_info" name="additional_info" maxlength="120" rows="3"><?php echo htmlspecialchars($ticket['additional_info'] ?? ''); ?></textarea>
                 </div>
 
                 <div class="form-group">
@@ -762,6 +875,89 @@ $stmt->close();
                 
                 <button type="submit" class="btn btn-success">Update Ticket</button>
             </form>
+            
+            <!-- Parts Management Section -->
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #ddd;">
+                <h3 style="color: var(--brand);">📦 Replacement Parts</h3>
+                
+                <?php if (!empty($attached_parts)): ?>
+                <div style="margin-bottom: 20px;">
+                    <h4>Parts Used on This Ticket</h4>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: var(--brand); color: white;">
+                                <th style="padding: 10px; text-align: left;">Part Name</th>
+                                <th style="padding: 10px; text-align: left;">Part Number</th>
+                                <th style="padding: 10px; text-align: center;">Quantity Used</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($attached_parts as $part): ?>
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 10px;"><?php echo htmlspecialchars($part['part_name']); ?></td>
+                                <td style="padding: 10px;"><?php echo htmlspecialchars($part['part_number'] ?? '-'); ?></td>
+                                <td style="padding: 10px; text-align: center;"><?php echo intval($part['quantity_used']); ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php endif; ?>
+                
+                <?php if (!empty($inventory_parts)): ?>
+                <form method="POST" style="margin-top: 20px;">
+                    <input type="hidden" name="attach_parts" value="1">
+                    <h4>Attach Parts to This Ticket</h4>
+                    <p style="color: #666; margin-bottom: 15px;">Select all parts used for this repair. Inventory will be automatically deducted.</p>
+                    
+                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: #f9f9f9;">
+                        <?php foreach ($inventory_parts as $part): ?>
+                            <?php 
+                            // Check if already attached
+                            $already_attached = false;
+                            foreach ($attached_parts as $attached) {
+                                if ($attached['part_id'] == $part['id']) {
+                                    $already_attached = true;
+                                    break;
+                                }
+                            }
+                            ?>
+                            <div style="padding: 10px; margin-bottom: 5px; background: white; border-radius: 4px; display: flex; align-items: center; gap: 10px; <?php echo $already_attached ? 'opacity: 0.5;' : ''; ?>">
+                                <input type="checkbox" 
+                                       name="parts[]" 
+                                       value="<?php echo $part['id']; ?>" 
+                                       id="part_<?php echo $part['id']; ?>"
+                                       <?php echo $already_attached ? 'disabled' : ''; ?>>
+                                <label for="part_<?php echo $part['id']; ?>" style="flex: 1; margin: 0; cursor: pointer;">
+                                    <strong><?php echo htmlspecialchars($part['part_name']); ?></strong>
+                                    <?php if ($part['part_number']): ?>
+                                        <span style="color: #666;">(<?php echo htmlspecialchars($part['part_number']); ?>)</span>
+                                    <?php endif; ?>
+                                    <span style="color: <?php echo $part['quantity'] <= 5 ? '#856404' : '#28a745'; ?>; font-weight: bold;"> — <?php echo $part['quantity']; ?> available</span>
+                                    <?php if ($already_attached): ?>
+                                        <span style="color: #999; font-style: italic;"> (Already attached)</span>
+                                    <?php endif; ?>
+                                </label>
+                                <input type="number" 
+                                       name="part_quantities[<?php echo $part['id']; ?>]" 
+                                       min="1" 
+                                       max="<?php echo $part['quantity']; ?>" 
+                                       value="1" 
+                                       style="width: 60px; padding: 5px;"
+                                       <?php echo $already_attached ? 'disabled' : ''; ?>>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <button type="submit" class="btn btn-success">Attach Selected Parts</button>
+                        <a href="inventory.php" class="btn" style="background-color: #6c757d;">Manage Inventory</a>
+                    </div>
+                </form>
+                <?php else: ?>
+                <p style="color: #666;">No parts currently available in inventory. <a href="inventory.php">Add parts to inventory</a></p>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </body>
