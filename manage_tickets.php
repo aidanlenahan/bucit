@@ -105,7 +105,7 @@ if ($per_page !== 'all') {
 }
 
 // Get current page tickets with sorting (include priority in the SELECT only when available)
-$select_columns = "id, first_name, last_name, school_id, class_of, phone, date_reported, problem_category, problem_detail, custom_detail, status, created_at";
+$select_columns = "id, first_name, last_name, school_id, class_of, school_email, additional_info, date_reported, problem_category, problem_detail, custom_detail, status, created_at";
 if ($has_priority) {
     $select_columns .= ", priority";
 }
@@ -170,6 +170,67 @@ $ticket_id = $_GET['ticket_id'] ?? null;
         .header-actions h1 {
             margin: 0;
             font-size: 28px;
+        }
+
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-dropdown-toggle {
+            color: #666;
+            font-size: 13px;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .user-dropdown-toggle:hover {
+            background-color: #f0f0f0;
+        }
+
+        .user-dropdown-toggle strong {
+            color: var(--brand);
+        }
+
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 180px;
+            z-index: 1000;
+            margin-top: 4px;
+        }
+
+        .user-dropdown:hover .user-dropdown-menu {
+            display: block;
+        }
+
+        .user-dropdown-menu a {
+            display: block;
+            padding: 10px 16px;
+            color: #333;
+            text-decoration: none;
+            font-size: 13px;
+            transition: background-color 0.2s;
+        }
+
+        .user-dropdown-menu a:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-dropdown-menu a:first-child {
+            border-radius: 4px 4px 0 0;
+        }
+
+        .user-dropdown-menu a:last-child {
+            border-radius: 0 0 4px 4px;
         }
 
         .filter-bar {
@@ -401,15 +462,22 @@ $ticket_id = $_GET['ticket_id'] ?? null;
         <div class="header-actions">
             <h1>Support Ticket Management</h1>
             <div class="action-btn-group">
-                <a href="index.html" class="btn btn-success" title="Add ticket" style="padding:8px 12px; font-size:18px; line-height:1;">+</a>
+                <a href="form.html" class="btn btn-success" title="Add ticket" style="padding:8px 12px; font-size:18px; line-height:1;">+</a>
                 <?php if ($current_tech === 'jmilonas'): ?>
                 <a href="admin_tech.php" class="btn" style="padding:8px 12px; font-size:13px;">Admin</a>
                 <?php endif; ?>
+                <a href="index.html" class="btn" style="padding:8px 12px; font-size:13px;">Home</a>
+                <a href="inventory.php" class="btn" style="padding:8px 12px; font-size:13px;">Inventory</a>
                 <a href="leaderboard.php" class="btn" style="padding:8px 12px; font-size:13px;">Bucit Ranked</a>
-                <span style="color:#666; font-size:13px; padding:0 8px;">
-                    <strong><?php echo htmlspecialchars($current_tech); ?></strong>
-                </span>
-                <a href="logout.php" class="btn" style="padding:8px 12px; font-size:13px;">Log out</a>
+                <div class="user-dropdown">
+                    <div class="user-dropdown-toggle">
+                        <strong><?php echo htmlspecialchars($current_tech); ?></strong> ▾
+                    </div>
+                    <div class="user-dropdown-menu">
+                        <a href="change_password.php">Change Password</a>
+                        <a href="logout.php">Log Out</a>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -591,7 +659,7 @@ $ticket_id = $_GET['ticket_id'] ?? null;
         <div style="text-align: center; padding: 40px;">
             <h3>No tickets found</h3>
             <p>No support tickets have been submitted yet.</p>
-            <a href="index.html" class="btn">Create First Ticket</a>
+            <a href="form.html" class="btn">Create First Ticket</a>
         </div>
         <?php endif; ?>
     </div>

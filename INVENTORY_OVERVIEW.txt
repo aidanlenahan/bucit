@@ -1,0 +1,87 @@
+INVENTORY FEATURE - FILE STRUCTURE
+=====================================
+
+New Files Created:
+------------------
+inventory.php                           → Main inventory management page
+phpscripts/create_inventory_tables.sql  → Database schema setup
+INVENTORY_SETUP.md                      → Setup & usage documentation
+
+Modified Files:
+---------------
+edit_ticket.php                         → Added parts selection UI & inventory deduction logic
+manage_tickets.php                      → Added "Inventory" button in header
+
+Database Tables Created:
+------------------------
+inventory
+   - Stores all replacement parts with quantities
+   - Columns: id, part_name, part_number, quantity, notes, created_at, updated_at
+
+ticket_parts
+   - Junction table linking tickets to parts used
+   - Columns: id, ticket_id, part_id, quantity_used, added_at, added_by
+   - Automatically deducts from inventory when parts attached
+
+WORKFLOW:
+=========
+
+1. ADD INVENTORY
+   ┌─────────────────────┐
+   │   inventory.php     │
+   │ - Add part name     │
+   │ - Set quantity      │
+   │ - Add notes         │
+   └─────────────────────┘
+            ↓
+   ┌─────────────────────┐
+   │  inventory table    │ ← Stores part details
+   └─────────────────────┘
+
+2. ATTACH PARTS TO TICKET
+   ┌─────────────────────┐
+   │  edit_ticket.php    │
+   │ - Select parts      │
+   │ - Set quantities    │
+   │ - Click "Attach"    │
+   └─────────────────────┘
+            ↓
+   ┌─────────────────────┐
+   │  ticket_parts       │ ← Records usage
+   └─────────────────────┘
+            ↓
+   ┌─────────────────────┐
+   │  inventory table    │ ← Quantity reduced
+   │  (quantity - used)  │
+   └─────────────────────┘
+
+3. VIEW PARTS ON TICKET
+   ┌─────────────────────┐
+   │  edit_ticket.php    │
+   │ Shows table of:     │
+   │ - Part names        │
+   │ - Part numbers      │
+   │ - Quantities used   │
+   └─────────────────────┘
+
+KEY FEATURES:
+=============
+✅ CRUD operations on inventory items
+✅ Quick +1/-1 quantity adjustments
+✅ Multi-select checkbox interface
+✅ Automatic inventory deduction
+✅ Transaction-safe operations
+✅ Duplicate prevention
+✅ Low stock warnings (color-coded)
+✅ Part usage history per ticket
+
+NAVIGATION:
+===========
+manage_tickets.php → [Inventory] button → inventory.php
+manage_tickets.php → [Ticket #123] → edit_ticket.php → Parts section at bottom
+
+ACCESS REQUIREMENTS:
+====================
+- Must be logged in as technician
+- Uses same authentication as ticket management
+- Session variable: $_SESSION['tech_user']
