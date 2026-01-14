@@ -873,7 +873,12 @@ $stmt->close();
                     <textarea id="notes" name="notes" placeholder="Add notes about this ticket..."><?php echo htmlspecialchars($ticket['notes'] ?? ''); ?></textarea>
                 </div>
                 
-                <button type="submit" class="btn btn-success">Update Ticket</button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button type="submit" class="btn btn-success">Update Ticket</button>
+                    <?php if (($ticket['status'] ?? '') !== 'Closed'): ?>
+                        <a href="close_ticket.php?ticket_id=<?php echo $ticket_id; ?>" class="btn" style="background: #28a745; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px;">✓ Close Ticket & Send Email</a>
+                    <?php endif; ?>
+                </div>
             </form>
             
             <!-- Parts Management Section -->

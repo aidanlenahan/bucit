@@ -97,6 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
+// Check for success message from redirect
+if (isset($_GET['success'])) {
+    $success_message = $_GET['success'];
+}
+
 // Get all inventory items
 $inventory_query = $conn->query("SELECT * FROM inventory ORDER BY part_name ASC");
 $inventory_items = [];
