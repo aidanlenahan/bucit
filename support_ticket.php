@@ -1,19 +1,9 @@
 <?php
 // submit_ticket.php
-
-// Database connection parameters
-$servername = "localhost";
-$username = "bucit";       // or your DB username
-$password = "m0Mih-Vdm!].Km8F";           // your DB password
-$dbname = "bucit";
+require_once __DIR__ . '/includes/db_config.php';
 
 // Connect to MySQL
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-  die("Connection failed: " . $conn->connect_error);
-}
+$conn = getDbConnection();
 
 // Collect form data safely
 $firstName = $_POST['firstName'] ?? '';

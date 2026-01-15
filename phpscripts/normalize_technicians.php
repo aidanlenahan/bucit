@@ -6,15 +6,9 @@
 
 // WARNING: Run this once from a safe environment (backup your DB first).
 
-$servername = "localhost";
-$username = "bucit";
-$password = "m0Mih-Vdm!].Km8F";
-$dbname = "bucit";
+require_once __DIR__ . '/../includes/db_config.php';
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+$conn = getDbConnection();
 
 echo "<h2>Normalizing technician usernames and filling display names</h2>";
 

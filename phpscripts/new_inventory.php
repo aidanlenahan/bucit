@@ -1,19 +1,9 @@
 <?php
 // new_inventory.php - Add new parts to inventory
-
-// Database connection parameters
-$servername = "localhost";
-$username = "bucit";
-$password = "m0Mih-Vdm!].Km8F";
-$dbname = "bucit";
+require_once __DIR__ . '/../includes/db_config.php';
 
 // Connect to MySQL
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+$conn = getDbConnection();
 
 // Start session and require technician login
 if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -135,15 +125,27 @@ $conn->close();
         }
 
         .btn {
-            background-color: var(--brand);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
+            background-color: var(--brand) !important;
+            color: white !important;
+            padding: 0 20px !important;
+            border: none !important;
+            border-radius: 4px !important;
+            cursor: pointer !important;
+            font-size: 14px !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+            height: 40px !important;
+            line-height: 40px !important;
+            vertical-align: middle !important;
+            margin-right: 10px !important;
+            font-family: Arial, sans-serif !important;
+        }
+
+        button.btn {
+            font-weight: normal !important;
         }
 
         .btn:hover {

@@ -1,0 +1,16 @@
+# Sensitive configuration files with credentials
+includes/email_config.php
+includes/db_config.php
+includes/phpmyadmin
+
+# Dependencies
+/vendor/
+
+# Temporary files
+*.tmp
+*.log
+*.zip
+
+# IDE files
+.vscode/
+.idea/

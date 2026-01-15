@@ -1,16 +1,9 @@
 <?php
 session_start();
 // login.php - Technician login (renamed)
+require_once __DIR__ . '/includes/db_config.php';
 
-$servername = "localhost";
-$username = "bucit";
-$password = "m0Mih-Vdm!].Km8F";
-$dbname = "bucit";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+$conn = getDbConnection();
 
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
