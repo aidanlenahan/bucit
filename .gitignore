@@ -1,7 +1,7 @@
 # Sensitive configuration files with credentials
 includes/email_config.php
 includes/db_config.php
-includes/phpmyadmin
+# includes/phpmyadmin
 
 # Temporary files
 *.tmp
