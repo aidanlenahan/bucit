@@ -186,6 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             display: flex;
             gap: 10px;
             margin-top: 25px;
+            align-items: center;
         }
 
         .btn {
@@ -196,8 +197,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 14px;
             font-weight: 600;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s;
+            height: 44px;
+            box-sizing: border-box;
         }
 
         .btn-primary {

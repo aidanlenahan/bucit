@@ -431,7 +431,7 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
             background: none;
             border: none;
             width: 30px;
-            height: 30px;
+            height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
