@@ -202,7 +202,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             justify-content: center;
             transition: all 0.2s;
             height: 44px;
+            line-height: 1;
             box-sizing: border-box;
+            vertical-align: middle;
         }
 
         .btn-primary {
