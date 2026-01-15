@@ -1,0 +1,4 @@
+We want to add system that addresses each loaner computer that give out to people who need prolonged chromebook repair.
+
+Make sure each ticket that requires a ticket to be given out has a spot in ticket that says if a loaner was asigned and which loaner was asigned.0.2s
+
