@@ -2,6 +2,7 @@
 /**
  * Email Configuration
  * SMTP credentials for sending emails
+ Don't try to use these credentials, they have been cycled ;)
  */
 
 define('SMTP_HOST', 'smtp.gmail.com');
