@@ -51,6 +51,10 @@ nav a.active{ background: rgba(255,255,255,0.15); }
 </head>
 <body><nav>
   <div>
+    <a href="index.html" style="display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.2em; margin-right: 10px;">
+      <img src="img/buc.svg" alt="BucIT Logo" style="height: 32px; width: 32px;">
+      <span>BucIT</span>
+    </a>
     <a href="index.html">Home</a>
     <a href="form.html">Intake Form</a>
     <a href="status.php" class="active">Ticket Status</a>

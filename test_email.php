@@ -9,7 +9,7 @@ require_once 'includes/functions.php';
 // Test 1: Send a simple test email
 echo "<h2>Testing Email Configuration</h2>";
 
-$testEmail = 'f3fff0@gmail.com'; // Change this to your test email
+$testEmail = 'aidanlenahan@gmail.com'; // Change this to your test email
 echo "<p>Sending test email to: $testEmail</p>";
 
 $testResult = sendTestEmail($testEmail);
