@@ -8,15 +8,9 @@ if (empty($_SESSION['tech_user'])) {
 $current_user = $_SESSION['tech_user'];
 $is_admin = ($current_user === 'jmilonas');
 
-$servername = "localhost";
-$username = "bucit";
-$password = "m0Mih-Vdm!].Km8F";
-$dbname = "bucit";
+require_once __DIR__ . '/includes/db_config.php';
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die('Connection failed: ' . $conn->connect_error);
-}
+$conn = getDbConnection();
 
 $bucit_point_defaults = [
     'screen' => 10,

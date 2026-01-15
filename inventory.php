@@ -1,19 +1,9 @@
 <?php
 // inventory.php - Manage replacement parts inventory
-
-// Database connection parameters
-$servername = "localhost";
-$username = "bucit";
-$password = "m0Mih-Vdm!].Km8F";
-$dbname = "bucit";
+require_once __DIR__ . '/includes/db_config.php';
 
 // Connect to MySQL
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+$conn = getDbConnection();
 
 // Start session and require technician login
 if (session_status() !== PHP_SESSION_ACTIVE) {
