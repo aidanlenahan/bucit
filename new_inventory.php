@@ -58,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Part - BucIT Support</title>
+    <link rel="icon" type="image/svg+xml" href="img/buc.svg">
     <link rel="stylesheet" href="styles.css">
     <style>
         :root {
@@ -204,7 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             height: 44px;
             line-height: 1;
             box-sizing: border-box;
-            vertical-align: middle;
+            vertical-align: top;
         }
 
         .btn-primary {

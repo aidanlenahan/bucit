@@ -7,6 +7,7 @@ $ticket_id = $_GET['ticket_id'] ?? null;
 <head>
 <meta charset="utf-8">
 <title>Ticket Submitted</title>
+<link rel="icon" type="image/svg+xml" href="img/buc.svg">
 <link rel="stylesheet" href="styles.css">
 <style>
 :root{ --brand: #800000; --card-bg: rgba(255,255,255,0.98); }
