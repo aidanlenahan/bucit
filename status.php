@@ -2,8 +2,6 @@
 // status.php - simple public page for students to check ticket status by ticket ID
 require_once __DIR__ . '/includes/db_config.php';
 
-$conn = getDbConnection();
-
 $ticketId = trim($_GET['id'] ?? '');
 $ticket = null;
 $notFound = false;
