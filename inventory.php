@@ -122,6 +122,7 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Management - BucIT Support</title>
+    <link rel="icon" type="image/svg+xml" href="img/buc.svg">
     <link rel="stylesheet" href="styles.css">
     <style>
         :root {
@@ -466,7 +467,7 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <a href="new_inventory.php" class="btn btn-success" title="Add new part" style="padding:8px 12px; font-size:18px; line-height:1;">+</a>
-                <a href="manage_tickets.php" class="back-link">← Back to Tickets</a>
+                <a href="manage_tickets.php" class="btn" style="padding:8px 12px; font-size:18px; line-height:1; background-color: var(--brand);">Back to Tickets</a>
             </div>
         </div>
 

@@ -124,6 +124,7 @@ $ticket_id = $_GET['ticket_id'] ?? null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Support Ticket Management</title>
+    <link rel="icon" type="image/svg+xml" href="img/buc.svg">
     <link rel="stylesheet" href="styles.css">
     <style>
         /* Theme variables */
@@ -618,7 +619,12 @@ $ticket_id = $_GET['ticket_id'] ?? null;
                     <?php endif; ?>
                     <td><?php echo date('M d, Y', strtotime($row['date_reported'])); ?></td>
                     <td onclick="event.stopPropagation();">
-                        <a href="edit_ticket.php?id=<?php echo $row['id']; ?>" class="btn" style="padding: 5px 10px; font-size: 12px;">Edit</a>
+                        <a href="edit_ticket.php?id=<?php echo $row['id']; ?>" class="btn" style="padding: 5px 10px; font-size: 12px;" title="Edit Ticket">
+                            <img src="img/edit.png" alt="Edit" style="width: 16px; height: 16px; vertical-align: middle; filter: brightness(0) invert(1);">
+                        </a>
+                        <button onclick="printTicket(<?php echo $row['id']; ?>); event.stopPropagation();" class="btn" style="padding: 5px 10px; font-size: 12px; margin-left: 5px;" title="Print Ticket">
+                            <img src="img/print.png" alt="Print" style="width: 16px; height: 16px; vertical-align: middle; filter: brightness(0) invert(1);">
+                        </button>
                     </td>
                 </tr>
                 <?php endwhile; ?>
@@ -674,6 +680,16 @@ $ticket_id = $_GET['ticket_id'] ?? null;
         
         function viewTicket(ticketId) {
             window.location.href = `edit_ticket.php?id=${ticketId}`;
+        }
+        
+        function printTicket(ticketId) {
+            // Open ticket in new window and trigger print
+            const printWindow = window.open(`edit_ticket.php?id=${ticketId}`, '_blank');
+            if (printWindow) {
+                printWindow.addEventListener('load', function() {
+                    printWindow.print();
+                });
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {

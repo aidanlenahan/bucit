@@ -170,6 +170,7 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bucit Ranked</title>
+    <link rel="icon" type="image/svg+xml" href="img/buc.svg">
     <link rel="stylesheet" href="styles.css">
     <style>
         :root { --brand: #800000; --brand-dark: #5a0000; }

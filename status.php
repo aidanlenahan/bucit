@@ -33,6 +33,7 @@ if ($ticketId !== '') {
 <head>
 <meta charset="utf-8">
 <title>Check Ticket Status</title>
+<link rel="icon" type="image/svg+xml" href="img/buc.svg">
 <link rel="stylesheet" href="styles.css">
 <style>
 :root{ --brand: #800000; }

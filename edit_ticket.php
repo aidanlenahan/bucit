@@ -162,7 +162,7 @@ if ($tech_query && $tech_query->num_rows > 0) {
 
 // Load available inventory parts
 $inventory_parts = [];
-$inventory_query = $conn->query("SELECT id, part_name, part_number, quantity FROM inventory WHERE quantity > 0 ORDER BY part_name ASC");
+$inventory_query = $conn->query("SELECT id, part_name, part_number, quantity, notes FROM inventory WHERE quantity > 0 ORDER BY part_name ASC");
 if ($inventory_query && $inventory_query->num_rows > 0) {
     while ($row = $inventory_query->fetch_assoc()) {
         $inventory_parts[] = $row;
@@ -185,8 +185,62 @@ if ($attached_query) {
 
 // Handle form submission for updates
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Handle part removal
+    if (isset($_POST['remove_part'])) {
+        $part_attachment_id = intval($_POST['remove_part']);
+        
+        // Get part info before removing
+        $check = $conn->prepare("SELECT tp.part_id, tp.quantity_used FROM ticket_parts tp WHERE tp.id = ? AND tp.ticket_id = ?");
+        $check->bind_param('ii', $part_attachment_id, $ticket_id);
+        $check->execute();
+        $result = $check->get_result();
+        
+        if ($result->num_rows > 0) {
+            $part_info = $result->fetch_assoc();
+            $check->close();
+            
+            // Begin transaction
+            $conn->begin_transaction();
+            
+            try {
+                // Return parts to inventory
+                $restore = $conn->prepare("UPDATE inventory SET quantity = quantity + ? WHERE id = ?");
+                $restore->bind_param('ii', $part_info['quantity_used'], $part_info['part_id']);
+                $restore->execute();
+                $restore->close();
+                
+                // Remove from ticket_parts
+                $remove = $conn->prepare("DELETE FROM ticket_parts WHERE id = ?");
+                $remove->bind_param('i', $part_attachment_id);
+                $remove->execute();
+                $remove->close();
+                
+                $conn->commit();
+                $success_message = "Part removed and returned to inventory!";
+                
+                // Reload attached parts
+                $attached_parts = [];
+                $attached_query = $conn->prepare("SELECT tp.id, tp.part_id, tp.quantity_used, i.part_name, i.part_number FROM ticket_parts tp JOIN inventory i ON tp.part_id = i.id WHERE tp.ticket_id = ?");
+                if ($attached_query) {
+                    $attached_query->bind_param('i', $ticket_id);
+                    $attached_query->execute();
+                    $result = $attached_query->get_result();
+                    while ($row = $result->fetch_assoc()) {
+                        $attached_parts[] = $row;
+                    }
+                    $attached_query->close();
+                }
+            } catch (Exception $e) {
+                $conn->rollback();
+                $error_message = "Error removing part: " . $e->getMessage();
+            }
+        } else {
+            $check->close();
+            $error_message = "Part not found.";
+        }
+    }
     // Handle parts attachment/removal
-    if (isset($_POST['attach_parts'])) {
+    elseif (isset($_POST['attach_parts'])) {
         $selected_parts = $_POST['parts'] ?? [];
         $part_quantities = $_POST['part_quantities'] ?? [];
         
@@ -438,6 +492,7 @@ $stmt->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Ticket #<?php echo htmlspecialchars($ticket['id']); ?></title>
+    <link rel="icon" type="image/svg+xml" href="img/buc.svg">
     <link rel="stylesheet" href="styles.css">
     <style>
         /* Theme variables */
@@ -601,6 +656,53 @@ $stmt->close();
             border-color: #f5c6cb;
             color: #721c24;
         }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            
+            .edit-container {
+                max-width: 100%;
+                padding: 0;
+                background: white;
+            }
+            
+            .ticket-header a,
+            .ticket-management,
+            .btn,
+            .alert,
+            form,
+            button {
+                display: none !important;
+            }
+            
+            .ticket-header,
+            .ticket-details {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                page-break-inside: avoid;
+            }
+            
+            .ticket-header h1 {
+                color: black;
+            }
+            
+            .status-badge {
+                border: 1px solid #333;
+            }
+            
+            h2, h3 {
+                color: black;
+                page-break-after: avoid;
+            }
+            
+            .detail-grid {
+                page-break-inside: avoid;
+            }
+        }
     </style>
 </head>
 <body>
@@ -616,7 +718,11 @@ $stmt->close();
         <div class="ticket-header">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h1>Ticket #<?php echo htmlspecialchars($ticket['id']); ?></h1>
-                <div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button type="button" onclick="window.print()" class="btn" style="background: var(--brand); padding: 8px 16px;" title="Print Ticket">
+                        <img src="img/print.png" alt="Print" style="width: 16px; height: 16px; vertical-align: middle; filter: brightness(0) invert(1); margin-right: 6px;">
+                        Print Ticket
+                    </button>
                     <span class="status-badge status-<?php echo strtolower(str_replace(' ', '-', $ticket['status'] ?? 'open')); ?>">
                         <?php echo htmlspecialchars($ticket['status'] ?? 'Open'); ?>
                     </span>
@@ -632,7 +738,7 @@ $stmt->close();
                 </div>
             </div>
             <div style="margin-top: 10px;">
-                <a href="manage_tickets.php" class="btn btn-secondary">← Back to Tickets</a>
+                <a href="manage_tickets.php" class="btn btn-secondary">Back to Tickets</a>
             </div>
         </div>
         
@@ -873,29 +979,32 @@ $stmt->close();
             
             <!-- Parts Management Section -->
             <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #ddd;">
-                <h3 style="color: var(--brand);">📦 Replacement Parts</h3>
+                <h3 style="color: var(--brand);">Replacement Parts</h3>
                 
                 <?php if (!empty($attached_parts)): ?>
                 <div style="margin-bottom: 20px;">
                     <h4>Parts Used on This Ticket</h4>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background-color: var(--brand); color: white;">
-                                <th style="padding: 10px; text-align: left;">Part Name</th>
-                                <th style="padding: 10px; text-align: left;">Part Number</th>
-                                <th style="padding: 10px; text-align: center;">Quantity Used</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($attached_parts as $part): ?>
-                            <tr style="border-bottom: 1px solid #ddd;">
-                                <td style="padding: 10px;"><?php echo htmlspecialchars($part['part_name']); ?></td>
-                                <td style="padding: 10px;"><?php echo htmlspecialchars($part['part_number'] ?? '-'); ?></td>
-                                <td style="padding: 10px; text-align: center;"><?php echo intval($part['quantity_used']); ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <?php foreach ($attached_parts as $part): ?>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 6px; border: 1px solid #dee2e6;">
+                            <div style="flex: 1; display: flex; gap: 20px; align-items: center;">
+                                <div style="flex: 2;">
+                                    <strong><?php echo htmlspecialchars($part['part_name']); ?></strong>
+                                </div>
+                                <div style="flex: 2; color: #666;">
+                                    <?php echo htmlspecialchars($part['part_number'] ?? 'N/A'); ?>
+                                </div>
+                                <div style="flex: 1; text-align: center;">
+                                    <span style="background: #e9ecef; padding: 4px 12px; border-radius: 4px; font-weight: 600;">Qty: <?php echo intval($part['quantity_used']); ?></span>
+                                </div>
+                            </div>
+                            <form method="POST" style="margin: 0;" onsubmit="return confirm('Remove this part and return it to inventory?');">
+                                <input type="hidden" name="remove_part" value="<?php echo $part['id']; ?>">
+                                <button type="submit" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;" title="Remove Part">✕</button>
+                            </form>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
                 <?php endif; ?>
                 
@@ -903,49 +1012,79 @@ $stmt->close();
                 <form method="POST" style="margin-top: 20px;">
                     <input type="hidden" name="attach_parts" value="1">
                     <h4>Attach Parts to This Ticket</h4>
-                    <p style="color: #666; margin-bottom: 15px;">Select all parts used for this repair. Inventory will be automatically deducted.</p>
                     
-                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: #f9f9f9;">
-                        <?php foreach ($inventory_parts as $part): ?>
-                            <?php 
-                            // Check if already attached
-                            $already_attached = false;
-                            foreach ($attached_parts as $attached) {
-                                if ($attached['part_id'] == $part['id']) {
-                                    $already_attached = true;
-                                    break;
-                                }
-                            }
-                            ?>
-                            <div style="padding: 10px; margin-bottom: 5px; background: white; border-radius: 4px; display: flex; align-items: center; gap: 10px; <?php echo $already_attached ? 'opacity: 0.5;' : ''; ?>">
-                                <input type="checkbox" 
-                                       name="parts[]" 
-                                       value="<?php echo $part['id']; ?>" 
-                                       id="part_<?php echo $part['id']; ?>"
-                                       <?php echo $already_attached ? 'disabled' : ''; ?>>
-                                <label for="part_<?php echo $part['id']; ?>" style="flex: 1; margin: 0; cursor: pointer;">
-                                    <strong><?php echo htmlspecialchars($part['part_name']); ?></strong>
-                                    <?php if ($part['part_number']): ?>
-                                        <span style="color: #666;">(<?php echo htmlspecialchars($part['part_number']); ?>)</span>
-                                    <?php endif; ?>
-                                    <span style="color: <?php echo $part['quantity'] <= 5 ? '#856404' : '#28a745'; ?>; font-weight: bold;"> — <?php echo $part['quantity']; ?> available</span>
-                                    <?php if ($already_attached): ?>
-                                        <span style="color: #999; font-style: italic;"> (Already attached)</span>
-                                    <?php endif; ?>
-                                </label>
-                                <input type="number" 
-                                       name="part_quantities[<?php echo $part['id']; ?>]" 
-                                       min="1" 
-                                       max="<?php echo $part['quantity']; ?>" 
-                                       value="1" 
-                                       style="width: 60px; padding: 5px;"
-                                       <?php echo $already_attached ? 'disabled' : ''; ?>>
-                            </div>
-                        <?php endforeach; ?>
+                    <div style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; background: white;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead style="position: sticky; top: 0; background: var(--brand); color: white; z-index: 10;">
+                                <tr>
+                                    <th style="padding: 12px; text-align: left; width: 60px;">Select</th>
+                                    <th style="padding: 12px; text-align: left;">Part Name</th>
+                                    <th style="padding: 12px; text-align: left;">Part Number</th>
+                                    <th style="padding: 12px; text-align: center; width: 120px;">Available</th>
+                                    <th style="padding: 12px; text-align: center; width: 100px;">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($inventory_parts as $part): ?>
+                                    <?php 
+                                    // Check if already attached
+                                    $already_attached = false;
+                                    foreach ($attached_parts as $attached) {
+                                        if ($attached['part_id'] == $part['id']) {
+                                            $already_attached = true;
+                                            break;
+                                        }
+                                    }
+                                    ?>
+                                    <tr style="border-bottom: 1px solid #ddd; <?php echo $already_attached ? 'background: #f8f9fa; opacity: 0.6;' : ''; ?>">
+                                        <td style="padding: 12px; text-align: center;">
+                                            <input type="checkbox" 
+                                                   name="parts[]" 
+                                                   value="<?php echo $part['id']; ?>" 
+                                                   id="part_<?php echo $part['id']; ?>"
+                                                   style="width: 18px; height: 18px; cursor: pointer;"
+                                                   <?php echo $already_attached ? 'disabled' : ''; ?>>
+                                        </td>
+                                        <td style="padding: 12px;">
+                                            <label for="part_<?php echo $part['id']; ?>" style="cursor: pointer; margin: 0; font-weight: 600;">
+                                                <?php echo htmlspecialchars($part['part_name']); ?>
+                                            </label>
+                                            <?php if (!empty($part['notes'])): ?>
+                                                <button type="button" onclick="showPartNotes(<?php echo htmlspecialchars(json_encode($part['part_name'])); ?>, <?php echo htmlspecialchars(json_encode($part['notes'])); ?>); event.preventDefault();" style="background: none; border: none; cursor: pointer; padding: 0; margin-left: 4px; vertical-align: middle;" title="View notes">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#666" style="vertical-align: middle;">
+                                                        <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                                                        <path d="M8 15h8v2H8zm0-4h8v2H8zm0-4h5v2H8z"/>
+                                                    </svg>
+                                                </button>
+                                            <?php endif; ?>
+                                            <?php if ($already_attached): ?>
+                                                <span style="color: #999; font-style: italic; font-size: 12px;"> (Already attached)</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td style="padding: 12px; color: #666;">
+                                            <?php echo htmlspecialchars($part['part_number'] ?? 'N/A'); ?>
+                                        </td>
+                                        <td style="padding: 12px; text-align: center; color: #000;">
+                                            <?php echo intval($part['quantity']); ?>
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <input type="number" 
+                                                   name="part_quantities[<?php echo $part['id']; ?>]" 
+                                                   min="1" 
+                                                   max="<?php echo $part['quantity']; ?>" 
+                                                   value="1" 
+                                                   style="width: 70px; padding: 6px; text-align: center; border: 1px solid #ced4da; border-radius: 4px;"
+                                                   <?php echo $already_attached ? 'disabled' : ''; ?>>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
                     
                     <div style="margin-top: 15px;">
                         <button type="submit" class="btn btn-success">Attach Selected Parts</button>
+                        <a href="manage_tickets.php" class="btn btn-secondary">← Back to Tickets</a>
                         <a href="inventory.php" class="btn" style="background-color: #6c757d;">Manage Inventory</a>
                     </div>
                 </form>
@@ -955,6 +1094,89 @@ $stmt->close();
             </div>
         </div>
     </div>
+    
+    <!-- Part Notes Modal -->
+    <div id="partNotesModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div style="background-color: white; margin: 10% auto; padding: 0; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <div style="padding: 15px 20px; background-color: var(--brand); color: white; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="partNotesTitle" style="margin: 0; color: white; font-size: 18px;">Part Notes</h3>
+                <button onclick="closePartNotes()" style="background: var(--brand); color: white; border: 2px solid white; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold; line-height: 1;" title="Close">&times;</button>
+            </div>
+            <div style="padding: 20px; color: #222;">
+                <p id="partNotesContent" style="margin: 0; white-space: pre-wrap; line-height: 1.6;"></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Part notes modal functions
+        function showPartNotes(partName, notes) {
+            document.getElementById('partNotesTitle').textContent = partName + ' - Notes';
+            document.getElementById('partNotesContent').textContent = notes || 'No notes available.';
+            document.getElementById('partNotesModal').style.display = 'block';
+        }
+        
+        function closePartNotes() {
+            document.getElementById('partNotesModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('partNotesModal');
+            if (event.target === modal) {
+                closePartNotes();
+            }
+        }
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closePartNotes();
+            }
+        });
+        
+        // Track if form has been modified
+        let formModified = false;
+        
+        // Get all form elements
+        const forms = document.querySelectorAll('form');
+        const inputs = document.querySelectorAll('input, select, textarea');
+        
+        // Mark form as modified when any input changes
+        inputs.forEach(input => {
+            // Skip certain inputs
+            if (input.type === 'hidden' || input.name === 'remove_part' || input.name === 'attach_parts') {
+                return;
+            }
+            
+            input.addEventListener('change', () => {
+                formModified = true;
+            });
+            
+            // For text inputs and textareas, also listen to input event
+            if (input.tagName === 'TEXTAREA' || (input.tagName === 'INPUT' && input.type === 'text')) {
+                input.addEventListener('input', () => {
+                    formModified = true;
+                });
+            }
+        });
+        
+        // Reset flag when form is submitted
+        forms.forEach(form => {
+            form.addEventListener('submit', () => {
+                formModified = false;
+            });
+        });
+        
+        // Warn before leaving page if there are unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (formModified) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+    </script>
 </body>
 </html>
 
