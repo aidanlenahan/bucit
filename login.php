@@ -3,7 +3,7 @@ session_start();
 // login.php - Technician login (renamed)
 require_once __DIR__ . '/includes/db_config.php';
 
-$conn = getDbConnection();
+// Connection is already established in db_config.php as $conn
 
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

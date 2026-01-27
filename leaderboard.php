@@ -10,7 +10,7 @@ $is_admin = ($current_user === 'jmilonas');
 
 require_once __DIR__ . '/includes/db_config.php';
 
-$conn = getDbConnection();
+// Connection is already established in db_config.php as $conn
 
 $bucit_point_defaults = [
     'screen' => 10,

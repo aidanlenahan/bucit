@@ -5,8 +5,7 @@
  */
 require_once __DIR__ . '/includes/db_config.php';
 
-// Connect to MySQL
-$conn = getDbConnection();
+// Connection is already established in db_config.php as $conn
 
 // Include email functions
 require_once 'includes/functions.php';

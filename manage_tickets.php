@@ -2,8 +2,7 @@
 // manage_tickets.php - Dashboard for viewing and managing support tickets
 require_once __DIR__ . '/includes/db_config.php';
 
-// Connect to MySQL
-$conn = getDbConnection();
+// Connection is already established in db_config.php as $conn
 
 // Start session and require technician login
 if (session_status() !== PHP_SESSION_ACTIVE) {

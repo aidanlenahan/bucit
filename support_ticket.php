@@ -1,9 +1,9 @@
 <?php
 // submit_ticket.php
 require_once __DIR__ . '/includes/db_config.php';
+require_once __DIR__ . '/includes/functions.php';
 
-// Connect to MySQL
-$conn = getDbConnection();
+// Connection is already established in db_config.php as $conn
 
 // Collect form data safely
 $firstName = $_POST['firstName'] ?? '';
@@ -57,6 +57,16 @@ if ($bind === false) {
 
 if ($stmt->execute()) {
   $ticket_id = $conn->insert_id;
+  
+  // Send confirmation email
+  $ticketData = [
+    'ticketNumber' => $ticket_id,
+    'problem' => $problem,
+    'problemDetail' => $subproblem ?: $customDetail,
+    'dateReported' => $date
+  ];
+  sendTicketCreatedEmail($schoolEmail, $firstName, $lastName, $ticketData);
+  
   $stmt->close();
   $conn->close();
   

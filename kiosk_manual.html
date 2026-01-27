@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BucIT Kiosk - Manual Entry</title>
+  <link rel="icon" type="image/svg+xml" href="img/buc.svg">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--brand);
+    }
+
+    .manual-container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      padding: 40px 32px;
+    }
+
+    .manual-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .manual-header h1 {
+      color: var(--brand);
+      margin: 0 0 10px 0;
+      font-size: 2em;
+    }
+
+    .manual-header p {
+      color: #666;
+      margin: 0;
+      font-size: 1.1em;
+    }
+
+    .back-link {
+      display: inline-block;
+      color: var(--brand);
+      text-decoration: none;
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 1.05em;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    form label {
+      display: block;
+      margin-bottom: 8px;
+      margin-top: 20px;
+      color: var(--brand);
+      font-weight: 600;
+      font-size: 1.05em;
+    }
+
+    form input,
+    form select,
+    form textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #d1d1d1;
+      border-radius: 6px;
+      font-size: 1.05em;
+      box-sizing: border-box;
+    }
+
+    form input:focus,
+    form select:focus,
+    form textarea:focus {
+      border-color: var(--brand);
+      outline: none;
+    }
+
+    form button {
+      width: 100%;
+      padding: 16px;
+      background: var(--brand);
+      color: white;
+      border: none;
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-top: 30px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    form button:hover {
+      background: var(--brand-dark);
+    }
+
+    .form-section {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid var(--brand);
+    }
+
+    .form-section h3 {
+      margin: 0 0 15px 0;
+      color: var(--brand);
+      font-size: 1.3em;
+    }
+  </style>
+</head>
+<body>
+  <div class="manual-container">
+    <a href="kiosk.html" class="back-link">← Back to Kiosk</a>
+    
+    <div class="manual-header">
+      <h1>Manual Entry</h1>
+      <p>Please fill out all information manually</p>
+    </div>
+
+    <form id="manual-form">
+      <div class="form-section">
+        <h3>Student Information</h3>
+        
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" required>
+
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" required>
+
+        <label for="schoolId">School ID # (6 digits):</label>
+        <input 
+          type="text" 
+          id="schoolId" 
+          name="schoolId" 
+          required 
+          pattern="\d{6}" 
+          maxlength="6" 
+          minlength="6" 
+          inputmode="numeric"
+          placeholder="123456"
+          title="Enter a 6-digit ID"
+        >
+
+        <label for="schoolEmail">School Email:</label>
+        <input 
+          type="email" 
+          id="schoolEmail" 
+          name="schoolEmail" 
+          required
+          placeholder="yourname@school.edu"
+          title="Enter a valid email address"
+        >
+
+        <label for="classOf">Class of:</label>
+        <input 
+          type="text" 
+          id="classOf" 
+          name="classOf"
+          pattern="\d{1,4}"
+          maxlength="4"
+          inputmode="numeric"
+          placeholder="2026"
+          title="Numbers only (up to 4 digits)"
+        >
+      </div>
+
+      <div class="form-section">
+        <h3>Device Information</h3>
+        
+        <label for="chromebookSerial">Chromebook Serial Number:</label>
+        <input 
+          type="text" 
+          id="chromebookSerial" 
+          name="chromebookSerial" 
+          required
+          placeholder="CB123456789"
+          maxlength="50"
+        >
+      </div>
+
+      <div class="form-section">
+        <h3>Issue Details</h3>
+        
+        <label for="problem">Problem:</label>
+        <select id="problem" name="problem" required>
+          <option value="" disabled selected>Select a problem</option>
+          <option value="screen">Screen not working</option>
+          <option value="battery">Battery issue</option>
+          <option value="keyboard">Keyboard not working</option>
+          <option value="wifi">WiFi connectivity</option>
+          <option value="login">Can't log in</option>
+          <option value="physical-damage">Physical damage</option>
+          <option value="other">Other</option>
+        </select>
+
+        <label for="restarted">Have you restarted the computer?</label>
+        <select id="restarted" name="restarted" required>
+          <option value="" disabled selected>Select an option</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+
+        <label for="additionalInfo">Additional Information:</label>
+        <textarea 
+          id="additionalInfo" 
+          name="additionalInfo"
+          rows="4"
+          maxlength="200"
+          placeholder="Please describe your issue in detail (max 200 characters)"
+        ></textarea>
+      </div>
+
+      <button type="submit">Submit Ticket</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('manual-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Simulate ticket submission
+      const ticketNumber = Math.floor(10000 + Math.random() * 90000);
+      
+      alert('Ticket submitted successfully!\n\nTicket #' + ticketNumber + '\n\nPlease wait for a technician to assist you.');
+      
+      // Redirect back to kiosk
+      window.location.href = 'kiosk.html';
+    });
+  </script>
+</body>
+</html>
