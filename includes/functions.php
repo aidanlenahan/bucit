@@ -14,6 +14,86 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/email_config.php';
 
 /**
+ * Send email confirmation when a ticket is created
+ * 
+ * @param string $email Recipient's email address
+ * @param string $firstName Recipient's first name
+ * @param string $lastName Recipient's last name
+ * @param array $ticketData Ticket information (ticketNumber, problem, date, etc.)
+ * @return bool True if email sent successfully, false otherwise
+ */
+function sendTicketCreatedEmail($email, $firstName, $lastName, $ticketData) {
+    $mail = new PHPMailer(true);
+    
+    try {
+        // Configure SMTP settings
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = SMTP_USERNAME;
+        $mail->Password   = SMTP_PASSWORD;
+        $mail->SMTPSecure = SMTP_SECURE;
+        $mail->Port       = SMTP_PORT;
+        
+        // Set sender & recipient
+        $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
+        $mail->addAddress($email, "$firstName $lastName");
+        
+        // Extract ticket data
+        $ticketNumber = isset($ticketData['ticketNumber']) ? $ticketData['ticketNumber'] : 'N/A';
+        $problem = isset($ticketData['problem']) ? $ticketData['problem'] : 'Not specified';
+        $problemDetail = isset($ticketData['problemDetail']) ? $ticketData['problemDetail'] : '';
+        $dateReported = isset($ticketData['dateReported']) ? $ticketData['dateReported'] : date('Y-m-d');
+        
+        // Build HTML email
+        $mail->isHTML(true);
+        $mail->Subject = "Support Ticket #$ticketNumber - Confirmation";
+        $mail->Body    = "
+        <html>
+            <body style='font-family: Arial, sans-serif; color: #333;'>
+                <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+                    <h2 style='color: #800000;'>Support Ticket Submitted</h2>
+                    <p>Hello <strong>$firstName $lastName</strong>,</p>
+                    <p>Your support ticket has been successfully submitted and assigned to our technical support team.</p>
+                    
+                    <div style='background: #f8f9fa; padding: 15px; border-left: 4px solid #800000; margin: 20px 0;'>
+                        <p style='margin: 5px 0;'><strong>Ticket Number:</strong> #$ticketNumber</p>
+                        <p style='margin: 5px 0;'><strong>Date Submitted:</strong> $dateReported</p>
+                        <p style='margin: 5px 0;'><strong>Problem Category:</strong> $problem</p>" .
+                        ($problemDetail ? "<p style='margin: 5px 0;'><strong>Details:</strong> $problemDetail</p>" : "") . "
+                    </div>
+                    
+                    <p>A technician will review your ticket and contact you shortly. You can check your ticket status at any time.</p>
+                    
+                    <p style='margin-top: 30px; color: #666; font-size: 12px;'>
+                        Thank you for using BUCIT Support<br>
+                        This is an automated message, please do not reply to this email.
+                    </p>
+                </div>
+            </body>
+        </html>
+        ";
+        
+        // Plain text alternative
+        $mail->AltBody = "Hello $firstName $lastName,\n\n" .
+                        "Your support ticket has been successfully submitted and assigned to our technical support team.\n\n" .
+                        "Ticket Number: #$ticketNumber\n" .
+                        "Date Submitted: $dateReported\n" .
+                        "Problem Category: $problem\n" .
+                        ($problemDetail ? "Details: $problemDetail\n" : "") . "\n" .
+                        "A technician will review your ticket and contact you shortly.\n\n" .
+                        "Thank you for using BUCIT Support";
+        
+        // Send email
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        error_log("Email send failed: {$mail->ErrorInfo}");
+        return false;
+    }
+}
+
+/**
  * Send email notification when a ticket is closed
  * 
  * @param string $email Recipient's email address
@@ -53,11 +133,11 @@ function sendTicketClosedEmail($email, $firstName, $lastName, $ticketData) {
         <html>
             <body style='font-family: Arial, sans-serif; color: #333;'>
                 <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
-                    <h2 style='color: #667eea;'>Your Support Ticket Has Been Closed</h2>
+                    <h2 style='color: #800000;'>Your Support Ticket Has Been Closed</h2>
                     <p>Hello <strong>$firstName $lastName</strong>,</p>
                     <p>Your support ticket has been successfully resolved and closed.</p>
                     
-                    <div style='background: #f8f9fa; padding: 15px; border-left: 4px solid #667eea; margin: 20px 0;'>
+                    <div style='background: #f8f9fa; padding: 15px; border-left: 4px solid #800000; margin: 20px 0;'>
                         <p style='margin: 5px 0;'><strong>Ticket Number:</strong> #$ticketNumber</p>
                         <p style='margin: 5px 0;'><strong>Status:</strong> $status</p>
                         <p style='margin: 5px 0;'><strong>Closed Date:</strong> $closedDate</p>

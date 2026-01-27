@@ -7,7 +7,7 @@ if (empty($_SESSION['tech_user'])) {
 
 require_once __DIR__ . '/includes/db_config.php';
 
-$conn = getDbConnection();
+// Connection is already established in db_config.php as $conn
 
 $error = null;
 $success = null;

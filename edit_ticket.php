@@ -2,8 +2,7 @@
 // edit_ticket.php - View and edit individual support tickets
 require_once __DIR__ . '/includes/db_config.php';
 
-// Connect to MySQL
-$conn = getDbConnection();
+// Connection is already established in db_config.php as $conn
 
 $ticket_id = $_GET['id'] ?? null;
 

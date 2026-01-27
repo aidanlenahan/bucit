@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BucIT Kiosk - Check In/Out</title>
+  <link rel="icon" type="image/svg+xml" href="img/buc.svg">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--brand);
+      overflow-x: hidden;
+    }
+
+    .kiosk-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      min-height: calc(100vh - 40px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .kiosk-header {
+      background: var(--brand);
+      color: white;
+      padding: 30px 24px;
+      text-align: center;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .kiosk-header h1 {
+      margin: 0 0 10px 0;
+      font-size: 2.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .kiosk-header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 1.1em;
+    }
+
+    .tab-navigation {
+      display: flex;
+      border-bottom: 2px solid #e0e0e0;
+      background: #f5f5f5;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 20px;
+      border: none;
+      background: transparent;
+      font-size: 1.3em;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab-button:hover {
+      background: rgba(128, 0, 0, 0.05);
+    }
+
+    .tab-button.active {
+      color: var(--brand);
+      background: white;
+      border-bottom-color: var(--brand);
+    }
+
+    .tab-content {
+      display: none;
+      padding: 40px 32px;
+      flex: 1;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .scan-section {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, rgba(128, 0, 0, 0.03), rgba(128, 0, 0, 0.08));
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border: 2px dashed var(--brand);
+    }
+
+    .scan-icon {
+      font-size: 80px;
+      color: var(--brand);
+      margin-bottom: 20px;
+    }
+
+    .scan-section h2 {
+      color: var(--brand);
+      margin: 0 0 10px 0;
+      font-size: 1.8em;
+    }
+
+    .scan-section p {
+      color: #666;
+      font-size: 1.2em;
+      margin: 0;
+    }
+
+    .barcode-input {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.2em;
+      border: 2px solid #d1d1d1;
+      border-radius: 8px;
+      margin-top: 20px;
+      box-sizing: border-box;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    .barcode-input:focus {
+      border-color: var(--brand);
+      outline: none;
+    }
+
+    .student-greeting {
+      display: none;
+      background: #f9f9f9;
+      padding: 30px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 4px solid var(--brand);
+    }
+
+    .student-greeting.active {
+      display: block;
+    }
+
+    .student-greeting h3 {
+      margin: 0 0 15px 0;
+      color: var(--brand);
+      font-size: 1.5em;
+    }
+
+    .student-greeting p {
+      color: #333;
+      font-size: 1.1em;
+    }
+
+    .student-greeting .not-you-link {
+      display: inline-block;
+      color: var(--brand);
+      text-decoration: none;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+
+    .student-greeting .not-you-link:hover {
+      text-decoration: underline;
+    }
+
+    .kiosk-form {
+      display: none;
+    }
+
+    .kiosk-form.active {
+      display: block;
+    }
+
+    .kiosk-form label {
+      display: block;
+      margin-bottom: 8px;
+      margin-top: 20px;
+      color: var(--brand);
+      font-weight: 600;
+      font-size: 1.05em;
+    }
+
+    .kiosk-form input,
+    .kiosk-form select,
+    .kiosk-form textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #d1d1d1;
+      border-radius: 6px;
+      font-size: 1.1em;
+      box-sizing: border-box;
+    }
+
+    .kiosk-form input:focus,
+    .kiosk-form select:focus,
+    .kiosk-form textarea:focus {
+      border-color: var(--brand);
+      outline: none;
+    }
+
+    .kiosk-form button {
+      width: 100%;
+      padding: 18px;
+      background: var(--brand);
+      color: white;
+      border: none;
+      font-size: 1.3em;
+      font-weight: bold;
+      margin-top: 30px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .kiosk-form button:hover {
+      background: var(--brand-dark);
+    }
+
+    .success-message {
+      display: none;
+      text-align: center;
+      padding: 60px 30px;
+    }
+
+    .success-message.active {
+      display: block;
+    }
+
+    .success-icon {
+      font-size: 100px;
+      color: #4CAF50;
+      margin-bottom: 20px;
+    }
+
+    .success-message h2 {
+      color: var(--brand);
+      font-size: 2em;
+      margin: 0 0 20px 0;
+    }
+
+    .success-message p {
+      color: #666;
+      font-size: 1.3em;
+      margin: 10px 0;
+    }
+
+    .ticket-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: var(--brand);
+      margin: 20px 0;
+    }
+
+    .restart-button {
+      padding: 15px 40px;
+      background: var(--brand);
+      color: white;
+      border: none;
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-top: 30px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .restart-button:hover {
+      background: var(--brand-dark);
+    }
+
+    .student-info-display {
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    .student-info-display p {
+      margin: 8px 0;
+      color: #333;
+      font-size: 1.05em;
+    }
+
+    .student-info-display strong {
+      color: var(--brand);
+    }
+  </style>
+</head>
+<body>
+  <div class="kiosk-container">
+    <div class="kiosk-header">
+      <h1>
+        <img src="img/buc.svg" alt="BucIT Logo" style="height: 48px; width: 48px;">
+        BucIT Kiosk
+      </h1>
+      <p>Chromebook Check In/Out System</p>
+    </div>
+
+    <div class="tab-navigation">
+      <button class="tab-button active" onclick="switchTab('checkin')">Check In</button>
+      <button class="tab-button" onclick="switchTab('checkout')">Check Out</button>
+    </div>
+
+    <!-- CHECK IN TAB -->
+    <div id="checkin-tab" class="tab-content active">
+      <div class="scan-section" id="checkin-scan">
+        <div class="scan-icon"><img src="img/barcode.png" alt="Barcode" style="max-width: 150px; height: auto;"></div>
+        <h2>Scan Your Chromebook Barcode</h2>
+        <p>Please scan the barcode on your Chromebook to begin</p>
+        <input 
+          type="text" 
+          class="barcode-input" 
+          id="checkin-barcode" 
+          placeholder="Waiting for scan..."
+          autofocus
+        >
+      </div>
+
+      <div class="student-greeting" id="checkin-greeting">
+        <h3>Hi <span id="checkin-student-name">John Doe</span>,</h3>
+        <p>Please fill out the rest of the information below.</p>
+        <a href="kiosk_manual.html" class="not-you-link">Not you?</a>
+      </div>
+
+      <form class="kiosk-form" id="checkin-form">
+        <div class="student-info-display">
+          <p><strong>Student Name:</strong> <span id="checkin-display-name">John Doe</span></p>
+          <p><strong>Student ID:</strong> <span id="checkin-display-id">123456</span></p>
+          <p><strong>School Email:</strong> <span id="checkin-display-email">jdoe@school.edu</span></p>
+          <p><strong>Chromebook Serial:</strong> <span id="checkin-display-serial">CB123456789</span></p>
+        </div>
+
+        <label for="checkin-problem">Problem:</label>
+        <select id="checkin-problem" name="problem" required>
+          <option value="" disabled selected>Select a problem</option>
+          <option value="screen">Screen not working</option>
+          <option value="battery">Battery issue</option>
+          <option value="keyboard">Keyboard not working</option>
+          <option value="wifi">WiFi connectivity</option>
+          <option value="login">Can't log in</option>
+          <option value="physical-damage">Physical damage</option>
+          <option value="other">Other</option>
+        </select>
+
+        <label for="checkin-restarted">Have you restarted the computer?</label>
+        <select id="checkin-restarted" name="restarted" required>
+          <option value="" disabled selected>Select an option</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+
+        <label for="checkin-additional">Additional Information:</label>
+        <textarea 
+          id="checkin-additional" 
+          name="additionalInfo"
+          rows="4"
+          maxlength="200"
+          placeholder="Please describe your issue in detail (max 200 characters)"
+        ></textarea>
+
+        <button type="submit">Submit Check-In</button>
+      </form>
+
+      <div class="success-message" id="checkin-success">
+        <div class="success-icon">✓</div>
+        <h2>Check-In Complete!</h2>
+        <p>Your ticket has been submitted successfully.</p>
+        <p class="ticket-number">Ticket #<span id="checkin-ticket-number">12345</span></p>
+        <p>Please wait for a technician to assist you.</p>
+        <button class="restart-button" onclick="resetCheckIn()">Start New Check-In</button>
+      </div>
+    </div>
+
+    <!-- CHECK OUT TAB -->
+    <div id="checkout-tab" class="tab-content">
+      <div class="scan-section" id="checkout-scan">
+        <div class="scan-icon"><img src="img/barcode.png" alt="Barcode" style="max-width: 150px; height: auto;"></div>
+        <h2>Scan Your Chromebook Barcode</h2>
+        <p>Please scan the barcode on your Chromebook to check out</p>
+        <input 
+          type="text" 
+          class="barcode-input" 
+          id="checkout-barcode" 
+          placeholder="Waiting for scan..."
+        >
+      </div>
+
+      <div class="student-greeting" id="checkout-greeting">
+        <h3>Hi <span id="checkout-student-name">Jane Smith</span>,</h3>
+        <p>Please confirm your information below to check out your Chromebook.</p>
+        <a href="kiosk_manual.html" class="not-you-link">Not you?</a>
+      </div>
+
+      <form class="kiosk-form" id="checkout-form">
+        <div class="student-info-display">
+          <p><strong>Student Name:</strong> <span id="checkout-display-name">Jane Smith</span></p>
+          <p><strong>Student ID:</strong> <span id="checkout-display-id">654321</span></p>
+          <p><strong>School Email:</strong> <span id="checkout-display-email">jsmith@school.edu</span></p>
+          <p><strong>Chromebook Serial:</strong> <span id="checkout-display-serial">CB987654321</span></p>
+          <p><strong>Ticket ID:</strong> <span id="checkout-display-ticket">#12345</span></p>
+        </div>
+
+        <label for="checkout-condition">Chromebook Condition:</label>
+        <select id="checkout-condition" name="condition" required>
+          <option value="" disabled selected>Select condition</option>
+          <option value="fixed">Fixed - Working properly</option>
+          <option value="partially-fixed">Partially fixed - Some issues remain</option>
+          <option value="not-fixed">Not fixed - Still has issues</option>
+        </select>
+
+        <label for="checkout-notes">Additional Notes (Optional):</label>
+        <textarea 
+          id="checkout-notes" 
+          name="notes"
+          rows="4"
+          maxlength="200"
+          placeholder="Any additional feedback or concerns (max 200 characters)"
+        ></textarea>
+
+        <button type="submit">Complete Check-Out</button>
+      </form>
+
+      <div class="success-message" id="checkout-success">
+        <div class="success-icon">✓</div>
+        <h2>Check-Out Complete!</h2>
+        <p>Thank you for using BucIT Support.</p>
+        <p>Your ticket has been closed.</p>
+        <p class="ticket-number">Ticket #<span id="checkout-ticket-number">12345</span></p>
+        <button class="restart-button" onclick="resetCheckOut()">Start New Check-Out</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching functionality
+    function switchTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Update tab content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(tabName + '-tab').classList.add('active');
+
+      // Reset the tab when switching
+      if (tabName === 'checkin') {
+        resetCheckIn();
+      } else {
+        resetCheckOut();
+      }
+    }
+
+    // Check-in barcode simulation
+    document.getElementById('checkin-barcode').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && this.value.trim() !== '') {
+        simulateCheckInScan(this.value);
+      }
+    });
+
+    function simulateCheckInScan(barcode) {
+      // Hide scan section
+      document.getElementById('checkin-scan').style.display = 'none';
+      
+      // Show greeting
+      document.getElementById('checkin-greeting').classList.add('active');
+      
+      // Show form
+      document.getElementById('checkin-form').classList.add('active');
+      
+      // Simulate API data (dummy data)
+      document.getElementById('checkin-student-name').textContent = 'John Doe';
+      document.getElementById('checkin-display-name').textContent = 'John Doe';
+      document.getElementById('checkin-display-id').textContent = '123456';
+      document.getElementById('checkin-display-email').textContent = 'jdoe@school.edu';
+      document.getElementById('checkin-display-serial').textContent = barcode;
+    }
+
+    // Check-in form submission
+    document.getElementById('checkin-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Hide form and greeting
+      document.getElementById('checkin-greeting').classList.remove('active');
+      document.getElementById('checkin-form').classList.remove('active');
+      
+      // Show success message with random ticket number
+      const ticketNumber = Math.floor(10000 + Math.random() * 90000);
+      document.getElementById('checkin-ticket-number').textContent = ticketNumber;
+      document.getElementById('checkin-success').classList.add('active');
+    });
+
+    function resetCheckIn() {
+      // Reset all sections
+      document.getElementById('checkin-scan').style.display = 'block';
+      document.getElementById('checkin-greeting').classList.remove('active');
+      document.getElementById('checkin-form').classList.remove('active');
+      document.getElementById('checkin-success').classList.remove('active');
+      
+      // Clear form
+      document.getElementById('checkin-form').reset();
+      document.getElementById('checkin-barcode').value = '';
+      document.getElementById('checkin-barcode').focus();
+    }
+
+    // Check-out barcode simulation
+    document.getElementById('checkout-barcode').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && this.value.trim() !== '') {
+        simulateCheckOutScan(this.value);
+      }
+    });
+
+    function simulateCheckOutScan(barcode) {
+      // Hide scan section
+      document.getElementById('checkout-scan').style.display = 'none';
+      
+      // Show greeting
+      document.getElementById('checkout-greeting').classList.add('active');
+      
+      // Show form
+      document.getElementById('checkout-form').classList.add('active');
+      
+      // Simulate API data (dummy data)
+      document.getElementById('checkout-student-name').textContent = 'Jane Smith';
+      document.getElementById('checkout-display-name').textContent = 'Jane Smith';
+      document.getElementById('checkout-display-id').textContent = '654321';
+      document.getElementById('checkout-display-email').textContent = 'jsmith@school.edu';
+      document.getElementById('checkout-display-serial').textContent = barcode;
+      document.getElementById('checkout-display-ticket').textContent = '#' + Math.floor(10000 + Math.random() * 90000);
+    }
+
+    // Check-out form submission
+    document.getElementById('checkout-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Hide form and greeting
+      document.getElementById('checkout-greeting').classList.remove('active');
+      document.getElementById('checkout-form').classList.remove('active');
+      
+      // Show success message
+      const ticketNumber = document.getElementById('checkout-display-ticket').textContent.replace('#', '');
+      document.getElementById('checkout-ticket-number').textContent = ticketNumber;
+      document.getElementById('checkout-success').classList.add('active');
+    });
+
+    function resetCheckOut() {
+      // Reset all sections
+      document.getElementById('checkout-scan').style.display = 'block';
+      document.getElementById('checkout-greeting').classList.remove('active');
+      document.getElementById('checkout-form').classList.remove('active');
+      document.getElementById('checkout-success').classList.remove('active');
+      
+      // Clear form
+      document.getElementById('checkout-form').reset();
+      document.getElementById('checkout-barcode').value = '';
+      document.getElementById('checkout-barcode').focus();
+    }
+
+    // Auto-focus on barcode input when page loads
+    window.addEventListener('load', function() {
+      document.getElementById('checkin-barcode').focus();
+    });
+  </script>
+</body>
+</html>

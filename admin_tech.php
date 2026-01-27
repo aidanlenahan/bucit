@@ -7,7 +7,7 @@ if (empty($_SESSION['tech_user']) || $_SESSION['tech_user'] !== 'jmilonas') {
 }
 require_once __DIR__ . '/includes/db_config.php';
 
-$conn = getDbConnection();
+// Connection is already established in db_config.php as $conn
 
 // Handle actions: toggle active, reset password, create user, delete user, set custom password
 $message = '';

@@ -8,7 +8,7 @@
 
 require_once __DIR__ . '/../includes/db_config.php';
 
-$conn = getDbConnection();
+// Connection is already established in db_config.php as $conn
 
 echo "<h2>Normalizing technician usernames and filling display names</h2>";
 

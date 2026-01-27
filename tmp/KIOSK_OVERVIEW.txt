@@ -1,0 +1,78 @@
+KIOSK SYSTEM OVERVIEW
+=====================
+
+PURPOSE:
+The kiosk system provides a streamlined self-service interface for students to check in their Chromebooks for repair and check them out after service is completed. It will be deployed on a Chromebook in kiosk mode with an attached barcode scanner.
+
+HARDWARE SETUP:
+- Chromebook in kiosk mode
+- Connected USB barcode scanner
+- Full-screen browser locked to the kiosk page
+
+USER INTERFACE:
+Two main tabs are available:
+1. Check In - For students dropping off devices for repair
+2. Check Out - For students picking up repaired devices
+
+CHECK-IN WORKFLOW:
+1. Student scans the barcode on their Chromebook
+2. System queries Genesis/Destiny API using the scanned barcode
+3. API returns student information (First Name, Last Name, Student ID, School Email)
+4. System displays greeting: "Hi [First Last], please fill out the rest of the information below"
+5. Pre-populated information is shown to student for verification
+6. Student completes remaining form fields:
+   - Problem category (dropdown)
+   - Have you restarted the computer (dropdown)
+   - Additional information (text area)
+7. System generates and displays ticket ID number
+8. Student receives confirmation message
+
+CHECK-OUT WORKFLOW:
+1. Student scans the barcode on their Chromebook
+2. System queries Genesis/Destiny API using the scanned barcode
+3. API returns student information and associated open ticket
+4. System displays greeting: "Hi [First Last], please confirm your information below"
+5. Pre-populated information displayed including ticket ID
+6. Student confirms information and selects:
+   - Chromebook condition (fixed, partially fixed, not fixed)
+   - Additional notes (optional)
+7. System closes ticket and displays confirmation
+8. Student receives checkout confirmation
+
+MANUAL ENTRY FALLBACK:
+If barcode scanning fails or student information cannot be retrieved:
+- "Not you?" link redirects to manual entry page
+- Student manually enters all information:
+  - First Name, Last Name
+  - School ID (6 digits)
+  - School Email
+  - Class of (year)
+  - Chromebook Serial Number
+  - Problem details
+  - Restart status
+  - Additional information
+
+FUTURE INTEGRATION REQUIREMENTS:
+- Connect to Genesis API for student information retrieval
+- Connect to Destiny API as alternative/backup data source
+- Integrate with existing ticket database system
+- Map barcode scanner input to device serial number lookup
+- Implement ticket ID generation and tracking
+- Add ticket status tracking between check-in and check-out
+- Sync with existing technician dashboard for ticket management
+
+DESIGN CONSIDERATIONS:
+- Large, touch-friendly interface elements
+- Clear visual hierarchy and navigation
+- Consistent branding with existing BucIT pages (maroon color scheme)
+- Minimal text input required from students
+- Clear success/error messaging
+- Auto-reset functionality after each transaction
+- Accessibility features for diverse student population
+
+CURRENT STATUS:
+- Frontend UI complete (dummy/mock interface)
+- No database connectivity
+- No API integration
+- Static sample data for demonstration
+- Ready for visual review and UX testing
