@@ -1,18 +1,28 @@
 <?php
-// Database configuration
-$servername = "localhost";
-$username = "user";
-$password = "password";
-$dbname = "dbname";
+/**
+ * Database Configuration
+ * Centralized database connection credentials
+ */
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+define('DB_HOST', 'localhost');
+define('DB_USER', 'your_username');
+define('DB_PASS', 'your_password');
+define('DB_NAME', 'your_database');
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+/**
+ * Create database connection
+ * @return mysqli Database connection object
+ */
+function getDbConnection() {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    
+    return $conn;
 }
 
-// Set charset to utf8mb4 for proper character support
-$conn->set_charset("utf8mb4");
+// Create global connection
+$conn = getDbConnection();
 ?>
