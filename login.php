@@ -45,7 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
 }
-$conn->close();
+if (isset($conn)) {
+    $conn->close();
+}
 ?><!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Technician Login</title><link rel="icon" type="image/svg+xml" href="img/buc.svg"><link rel="stylesheet" href="styles.css"></head><body>
 <div style="max-width:420px;margin:40px auto;background:#fff;padding:20px;border-radius:8px">
