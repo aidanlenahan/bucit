@@ -5,7 +5,31 @@ require_once __DIR__ . '/includes/db_config.php';
 $ticketId = trim($_GET['id'] ?? '');
 $ticket = null;
 $notFound = false;
+$showSpecialPopup = false;
+
+// Validate ticket ID
 if ($ticketId !== '') {
+    // Check for special ID 67
+    if ($ticketId === '67') {
+        $showSpecialPopup = true;
+    }
+    // Check if ticket ID is numeric and positive
+    if (!ctype_digit($ticketId) || intval($ticketId) <= 0) {
+        $ticketId = '';
+        $notFound = true;
+    }
+    // Limit to 6 digits max
+    elseif (strlen($ticketId) > 6) {
+        $ticketId = substr($ticketId, 0, 6);
+    }
+    // Redirect specific IDs to login page
+    elseif ($ticketId === '263450' || $ticketId === '263497') {
+        header('Location: login.php');
+        exit;
+    }
+}
+
+if ($ticketId !== '' && !$notFound) {
     // Use prepared statement for safety
     $priorityCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'priority'");
     $has_priority = $priorityCheck && $priorityCheck->num_rows > 0;
@@ -68,7 +92,7 @@ nav a.active{ background: rgba(255,255,255,0.15); }
         <p>Enter your ticket ID to check the status and updates.</p>
         <form method="GET">
             <label for="id">Ticket ID</label>
-            <input type="number" id="id" name="id" value="<?php echo htmlspecialchars($ticketId); ?>" required>
+            <input type="text" id="id" name="id" value="<?php echo htmlspecialchars($ticketId); ?>" required pattern="\d{1,6}" maxlength="6" inputmode="numeric" title="Enter a valid ticket ID (up to 6 digits)">
             <button type="submit">Check</button>
         </form>
 
@@ -85,6 +109,22 @@ nav a.active{ background: rgba(255,255,255,0.15); }
         </div>
         <?php elseif ($notFound): ?>
         <div style="margin-top: 20px;" class="ticket-box">No ticket found with ID <?php echo htmlspecialchars($ticketId); ?></div>
+        <?php endif; ?>
+        
+        <?php if ($showSpecialPopup): ?>
+        <div id="specialPopup" style="margin-top: 20px; padding: 16px; background-color: #fff3cd; border-left: 4px solid #ffc107; color: #856404; border-radius: 4px;">
+            676767676767676767676767676767676767
+        </div>
+        <script>
+            setTimeout(function() {
+                var popup = document.getElementById('specialPopup');
+                if (popup) {
+                    popup.style.transition = 'opacity 0.3s';
+                    popup.style.opacity = '0';
+                    setTimeout(function() { popup.remove(); }, 300);
+                }
+            }, 2000);
+        </script>
         <?php endif; ?>
     </div>
 </body>
