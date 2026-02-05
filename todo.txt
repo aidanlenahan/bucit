@@ -1,11 +1,11 @@
-- 
-- make a chatbot or flowchart esc thing that asks the client questions about their computer in an attempt to self fix.
--
+- Update form/database
+    - Chromebook SN
+    - Private tech notes
+    - display admin notes on print ticket and ticket status
+    - remove level of priority from status.php
+    - Picked up (true/false)
+    - Pick up date
 
-
-
-
-- email functionality
 - access for Barry and front desk lady
 - chatbot to walk people through self fixes
 - loaner system

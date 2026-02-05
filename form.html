@@ -5,6 +5,44 @@
   <title>Chromebook Tech Support Ticket</title>
   <link rel="icon" type="image/svg+xml" href="img/buc.svg">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Google Translate Styling */
+    #google_translate_element {
+      display: inline-block;
+    }
+    .goog-te-gadget {
+      font-family: Arial, sans-serif;
+      font-size: 0;
+    }
+    .goog-te-gadget-simple {
+      background-color: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      cursor: pointer;
+      font-size: 14px !important;
+    }
+    .goog-te-gadget-simple:hover {
+      opacity: 0.8;
+    }
+    .goog-te-gadget-simple .goog-te-menu-value span {
+      color: #ccc !important;
+    }
+    .goog-te-gadget-simple .goog-te-menu-value span:first-child {
+      display: none;
+    }
+    .goog-te-gadget-icon {
+      display: none !important;
+    }
+    .goog-te-menu-value:before {
+      content: "🌐";
+      font-size: 18px;
+      margin-right: 6px;
+    }
+    .goog-te-menu-value span:nth-child(3) {
+      border-left: none !important;
+      color: #ccc !important;
+    }
+  </style>
 </head>
 <body>
   <nav style="background: #5a0000; padding: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
@@ -18,6 +56,7 @@
       <a href="status.php" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Ticket Status</a>
       <a href="chatbot.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Chatbot</a>
       <a href="articles/index.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Articles</a>
+      <div id="google_translate_element" style="margin-left: auto;"></div>
     </div>
   </nav>
 

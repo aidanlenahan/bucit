@@ -133,6 +133,17 @@
         font-size: 2rem;
       }
     }
+
+    /* Google Translate Styling */
+    #google_translate_element { display: inline-block; }
+    .goog-te-gadget { font-family: Arial, sans-serif; font-size: 0; }
+    .goog-te-gadget-simple { background-color: transparent !important; border: none !important; padding: 0 !important; cursor: pointer; font-size: 14px !important; }
+    .goog-te-gadget-simple:hover { opacity: 0.8; }
+    .goog-te-gadget-simple .goog-te-menu-value span { color: #ccc !important; }
+    .goog-te-gadget-simple .goog-te-menu-value span:first-child { display: none; }
+    .goog-te-gadget-icon { display: none !important; }
+    .goog-te-menu-value:before { content: "🌐"; font-size: 18px; margin-right: 6px; }
+    .goog-te-menu-value span:nth-child(3) { border-left: none !important; color: #ccc !important; }
   </style>
 </head>
 <body>
@@ -147,6 +158,7 @@
       <a href="../status.php" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Ticket Status</a>
       <a href="../chatbot.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Chatbot</a>
       <a href="index.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; background: rgba(255,255,255,0.15);">Articles</a>
+      <div id="google_translate_element" style="margin-left: auto;"></div>
     </div>
   </nav>
 
@@ -209,5 +221,15 @@
       <a href="index.html" class="back-button">Back to All Articles</a>
     </div>
   </div>
+
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        {pageLanguage: 'en', includedLanguages: 'es,en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE},
+        'google_translate_element'
+      );
+    }
+  </script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>

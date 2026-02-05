@@ -70,6 +70,16 @@ nav a.active{ background: rgba(255,255,255,0.15); }
 .container-header{ display:flex; justify-content:space-between; align-items:center; gap:12px; }
 .new-ticket-btn{ background:var(--brand); color:#fff; text-decoration:none; padding:10px 16px; border-radius:6px; font-weight:600; border:1px solid #5a0000; }
 .new-ticket-btn:hover{ background:#5a0000; }
+/* Google Translate Styling */
+#google_translate_element { display: inline-block; }
+.goog-te-gadget { font-family: Arial, sans-serif; font-size: 0; }
+.goog-te-gadget-simple { background-color: transparent !important; border: none !important; padding: 0 !important; cursor: pointer; font-size: 14px !important; }
+.goog-te-gadget-simple:hover { opacity: 0.8; }
+.goog-te-gadget-simple .goog-te-menu-value span { color: #ccc !important; }
+.goog-te-gadget-simple .goog-te-menu-value span:first-child { display: none; }
+.goog-te-gadget-icon { display: none !important; }
+.goog-te-menu-value:before { content: "🌐"; font-size: 18px; margin-right: 6px; }
+.goog-te-menu-value span:nth-child(3) { border-left: none !important; color: #ccc !important; }
 </style>
 </head>
 <body><nav>
@@ -83,6 +93,7 @@ nav a.active{ background: rgba(255,255,255,0.15); }
     <a href="status.php" class="active">Ticket Status</a>
     <a href="chatbot.html">Chatbot</a>
     <a href="articles/index.html">Articles</a>
+    <div id="google_translate_element" style="margin-left: auto;"></div>
   </div>
 </nav>    <div class="container">
         <div class="container-header">
