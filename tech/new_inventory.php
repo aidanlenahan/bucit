@@ -2,7 +2,7 @@
 /**
  * new_inventory.php - Add new replacement parts to inventory
  */
-require_once __DIR__ . '/includes/db_config.php';
+require_once __DIR__ . '/../includes/db_config.php';
 
 // Connection is already established in db_config.php as $conn
 
@@ -12,7 +12,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 $current_tech = $_SESSION['tech_user'] ?? null;
 if (empty($current_tech)) {
-    header('Location: tech_login.php');
+    header('Location: login.php');
     exit();
 }
 
@@ -54,11 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+        <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Part - BucIT Support</title>
-    <link rel="icon" type="image/svg+xml" href="img/buc.svg">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
     <style>
         :root {
             --brand: #800000;
@@ -335,6 +336,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </form>
         </div>
     </div>
-</body>
+    </body>
 </html>
 <?php $conn->close(); ?>

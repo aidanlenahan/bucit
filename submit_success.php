@@ -8,7 +8,8 @@ $ticket_id = $_GET['ticket_id'] ?? null;
 <meta charset="utf-8">
 <title>Ticket Submitted</title>
 <link rel="icon" type="image/svg+xml" href="img/buc.svg">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/dark-mode.css">
 <style>
 :root{ --brand: #800000; --card-bg: rgba(255,255,255,0.98); }
 body{ background: var(--brand); color:#fff; min-height:100vh; }
@@ -32,7 +33,7 @@ body{ background: var(--brand); color:#fff; min-height:100vh; }
   <a class="secondary" href="form.html">Submit Another Ticket</a></p>
 
   <hr>
-  <p style="font-size:0.95rem; color:#555;">This is the customer-facing confirmation. If you are a technician, <a href="manage_tickets.php">open the management dashboard</a> to view and manage tickets.</p>
+  <p style="font-size:0.95rem; color:#555;">This is the customer-facing confirmation. If you are a technician, <a href="tech/manage_tickets.php">open the management dashboard</a> to view and manage tickets.</p>
 </div>
 </body>
 </html>

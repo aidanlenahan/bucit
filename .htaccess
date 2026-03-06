@@ -1,3 +1,23 @@
 ErrorDocument 404 /bucit/404.html
 ErrorDocument 403 /bucit/403.html
 ErrorDocument 500 /bucit/500.html
+
+RewriteEngine On
+
+# /tech should land on technician login
+RewriteRule ^tech/?$ tech/login.php [R=302,L]
+
+# Legacy root technician endpoints -> /tech
+RewriteRule ^login\.php$ tech/login.php [R=301,L]
+RewriteRule ^logout\.php$ tech/logout.php [R=301,L]
+RewriteRule ^change_password\.php$ tech/change_password.php [R=301,L]
+RewriteRule ^manage_tickets\.php$ tech/manage_tickets.php [R=301,L]
+RewriteRule ^edit_ticket\.php$ tech/edit_ticket.php [R=301,L]
+RewriteRule ^close_ticket\.php$ tech/close_ticket.php [R=301,L]
+RewriteRule ^inventory\.php$ tech/inventory.php [R=301,L]
+RewriteRule ^new_inventory\.php$ tech/new_inventory.php [R=301,L]
+RewriteRule ^leaderboard\.php$ tech/leaderboard.php [R=301,L]
+RewriteRule ^admin_tech\.php$ tech/admin_tech.php [R=301,L]
+RewriteRule ^tech_login\.php$ tech/login.php [R=301,L]
+RewriteRule ^tech_logout\.php$ tech/logout.php [R=301,L]
+RewriteRule ^tech_change_password\.php$ tech/change_password.php [R=301,L]

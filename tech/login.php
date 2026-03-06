@@ -1,7 +1,7 @@
 <?php
 session_start();
 // login.php - Technician login (renamed)
-require_once __DIR__ . '/includes/db_config.php';
+require_once __DIR__ . '/../includes/db_config.php';
 
 // Connection is already established in db_config.php as $conn
 
@@ -49,7 +49,7 @@ if (isset($conn)) {
     $conn->close();
 }
 ?><!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Technician Login</title><link rel="icon" type="image/svg+xml" href="img/buc.svg"><link rel="stylesheet" href="styles.css"></head><body>
+<html><head><meta charset="utf-8"><title>Technician Login</title><link rel="icon" type="image/svg+xml" href="../img/buc.svg"><link rel="stylesheet" href="../css/styles.css"><link rel="stylesheet" href="../css/dark-mode.css"></head><body>
 <div style="max-width:420px;margin:40px auto;background:#fff;padding:20px;border-radius:8px">
 <h2>Technician Login</h2>
 <?php if ($error): ?><div style="color:#721c24;background:#f8d7da;padding:10px;border-radius:4px"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
@@ -60,7 +60,7 @@ if (isset($conn)) {
   <input name="password" type="password" required>
   <div style="margin-top:12px">
     <button type="submit" class="btn">Log in</button>
-    <a href="index.html" style="margin-left:8px">Back</a>
+    <a href="../index.html" style="margin-left:8px">Back</a>
   </div>
 </form>
 </div>

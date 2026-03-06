@@ -1,6 +1,6 @@
 <?php
 // manage_tickets.php - Dashboard for viewing and managing support tickets
-require_once __DIR__ . '/includes/db_config.php';
+require_once __DIR__ . '/../includes/db_config.php';
 
 // Connection is already established in db_config.php as $conn
 
@@ -30,6 +30,12 @@ $techCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'tech'");
 if ($techCheck && $techCheck->num_rows > 0) {
     $has_tech = true;
 }
+// Check whether picked_up column exists
+$has_picked_up = false;
+$pickedUpCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'picked_up'");
+if ($pickedUpCheck && $pickedUpCheck->num_rows > 0) {
+    $has_picked_up = true;
+}
 
 // Validate sorting parameters
     $valid_columns = ['id', 'first_name', 'last_name', 'school_id', 'date_reported', 'problem_category', 'status'];
@@ -40,6 +46,9 @@ if ($has_priority) {
 }
 if ($has_tech) {
     $valid_columns[] = 'tech';
+}
+if ($has_picked_up) {
+    $valid_columns[] = 'picked_up';
 }
 
 if (!in_array($sort_by, $valid_columns)) {
@@ -101,6 +110,9 @@ if ($has_priority) {
 if ($has_tech) {
     $select_columns .= ", tech";
 }
+if ($has_picked_up) {
+    $select_columns .= ", picked_up";
+}
 
 $order_by_sql = "$sort_by $order";
 // If sorting by priority, ensure closed tickets are always last so they don't get in the way
@@ -120,11 +132,12 @@ $ticket_id = $_GET['ticket_id'] ?? null;
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+        <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Support Ticket Management</title>
-    <link rel="icon" type="image/svg+xml" href="img/buc.svg">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
     <style>
         /* Theme variables */
         :root { --brand: #800000; --brand-dark: #5a0000; --card-bg: rgba(255,255,255,0.98); }
@@ -452,11 +465,11 @@ $ticket_id = $_GET['ticket_id'] ?? null;
         <div class="header-actions">
             <h1>Support Ticket Management</h1>
             <div class="action-btn-group">
-                <a href="form.html" class="btn btn-success" title="Add ticket" style="padding:8px 12px; font-size:18px; line-height:1;">+</a>
+                <a href="../form.html" class="btn btn-success" title="Add ticket" style="padding:8px 12px; font-size:18px; line-height:1;">+</a>
                 <?php if ($current_tech === 'jmilonas'): ?>
                 <a href="admin_tech.php" class="btn" style="padding:8px 12px; font-size:13px;">Admin</a>
                 <?php endif; ?>
-                <a href="index.html" class="btn" style="padding:8px 12px; font-size:13px;">Home</a>
+                <a href="../index.html" class="btn" style="padding:8px 12px; font-size:13px;">Home</a>
                 <a href="inventory.php" class="btn" style="padding:8px 12px; font-size:13px;">Inventory</a>
                 <a href="leaderboard.php" class="btn" style="padding:8px 12px; font-size:13px;">Bucit Ranked</a>
                 <div class="user-dropdown">
@@ -589,6 +602,14 @@ $ticket_id = $_GET['ticket_id'] ?? null;
                         <?php endif; ?>
                     </th>
                     <?php endif; ?>
+                    <?php if ($has_picked_up): ?>
+                    <th onclick="sortTable('picked_up')">
+                        Picked Up
+                        <?php if ($sort_by == 'picked_up'): ?>
+                            <span class="sort-indicator"><?php echo $order == 'ASC' ? '▲' : '▼'; ?></span>
+                        <?php endif; ?>
+                    </th>
+                    <?php endif; ?>
                     <th onclick="sortTable('date_reported')">
                         Date Reported
                         <?php if ($sort_by == 'date_reported'): ?>
@@ -616,13 +637,22 @@ $ticket_id = $_GET['ticket_id'] ?? null;
                     <?php if ($has_tech): ?>
                     <td><?php echo htmlspecialchars($row['tech'] ?? ''); ?></td>
                     <?php endif; ?>
+                    <?php if ($has_picked_up): ?>
+                    <td>
+                        <?php if (($row['picked_up'] ?? 'No') === 'Yes'): ?>
+                            <span style="color: #28a745; font-weight: 600;">✓ Yes</span>
+                        <?php else: ?>
+                            <span style="color: #999;">No</span>
+                        <?php endif; ?>
+                    </td>
+                    <?php endif; ?>
                     <td><?php echo date('M d, Y', strtotime($row['date_reported'])); ?></td>
                     <td onclick="event.stopPropagation();">
                         <a href="edit_ticket.php?id=<?php echo $row['id']; ?>" class="btn" style="padding: 5px 10px; font-size: 12px;" title="Edit Ticket">
-                            <img src="img/edit.png" alt="Edit" style="width: 16px; height: 16px; vertical-align: middle; filter: brightness(0) invert(1);">
+                            <img src="../img/edit.png" alt="Edit" style="width: 16px; height: 16px; vertical-align: middle; filter: brightness(0) invert(1);">
                         </a>
                         <button onclick="printTicket(<?php echo $row['id']; ?>); event.stopPropagation();" class="btn" style="padding: 5px 10px; font-size: 12px; margin-left: 5px;" title="Print Ticket">
-                            <img src="img/print.png" alt="Print" style="width: 16px; height: 16px; vertical-align: middle; filter: brightness(0) invert(1);">
+                            <img src="../img/print.png" alt="Print" style="width: 16px; height: 16px; vertical-align: middle; filter: brightness(0) invert(1);">
                         </button>
                     </td>
                 </tr>
@@ -654,7 +684,7 @@ $ticket_id = $_GET['ticket_id'] ?? null;
         <div style="text-align: center; padding: 40px;">
             <h3>No tickets found</h3>
             <p>No support tickets have been submitted yet.</p>
-            <a href="form.html" class="btn">Create First Ticket</a>
+            <a href="../form.html" class="btn">Create First Ticket</a>
         </div>
         <?php endif; ?>
     </div>
@@ -714,7 +744,7 @@ $ticket_id = $_GET['ticket_id'] ?? null;
             });
         });
     </script>
-</body>
+    </body>
 </html>
 
 <?php

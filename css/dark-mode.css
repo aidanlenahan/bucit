@@ -1,0 +1,411 @@
+/* Dark Mode Styles */
+
+/* Dark Theme (Default) */
+:root {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #3a3a3a;
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --text-tertiary: #808080;
+  --brand-primary: #ff6b6b;
+  --brand-secondary: #ee5a52;
+  --brand-light: #ff8787;
+  --border-color: #444;
+  --border-light: #555;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --shadow-strong: rgba(0, 0, 0, 0.6);
+  --card-bg: #2d2d2d;
+  --input-bg: #3a3a3a;
+  --input-border: #555;
+  --success-bg: #1e4620;
+  --success-text: #a8d5ab;
+  --success-border: #2e6930;
+  --warning-bg: #4d3800;
+  --warning-text: #ffd966;
+  --warning-border: #6b4f00;
+  --error-bg: #5a1a1a;
+  --error-text: #ffb3b3;
+  --error-border: #7a2828;
+  --info-bg: #1a3a4d;
+  --info-text: #90caf9;
+  --info-border: #2979ff;
+  --toggle-bg: #3a3a3a;
+  --toggle-text: #e0e0e0;
+  --toggle-border: #555555;
+  --hero-gradient-start: #2d1515;
+  --hero-gradient-end: #1a0d0d;
+  --nav-bg: #1a0d0d;
+  --nav-hover: rgba(255, 255, 255, 0.15);
+  --link-color: #ff8787;
+  --link-hover: #ffb3b3;
+}
+
+/* Apply theme colors to common elements */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+main, .container, .edit-container, .management-container, .articles-container {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--brand-primary);
+}
+
+a {
+  color: var(--link-color);
+}
+
+a:hover {
+  color: var(--link-hover);
+}
+
+/* Button styling */
+button, .btn, .new-ticket-btn {
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.new-ticket-btn {
+  background-color: var(--brand-primary);
+  color: var(--text-primary);
+  border-color: var(--brand-secondary);
+}
+
+.new-ticket-btn:hover {
+  background-color: var(--brand-secondary);
+}
+
+input, textarea, select {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--input-border);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+}
+
+nav, .nav {
+  background: var(--nav-bg) !important;
+}
+
+nav a:hover {
+  background: var(--nav-hover) !important;
+}
+
+.feature-card, .article-card, .stat-card, .ticket-box, .info-box, .detail-item {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.ticket-details, .ticket-header {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.tickets-table {
+  background-color: var(--bg-secondary);
+}
+
+.tickets-table th {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.tickets-table tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.tickets-table td {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.alert-success, .success {
+  background-color: var(--success-bg);
+  color: var(--success-text);
+  border-color: var(--success-border);
+}
+
+.alert-danger, .error {
+  background-color: var(--error-bg);
+  color: var(--error-text);
+  border-color: var(--error-border);
+}
+
+.warning {
+  background-color: var(--warning-bg);
+  color: var(--warning-text);
+  border-color: var(--warning-border);
+}
+
+.info-box {
+  background-color: var(--info-bg);
+  border-color: var(--info-border);
+  color: var(--info-text);
+}
+
+.detail-label {
+  color: var(--text-secondary);
+}
+
+.detail-value {
+  color: var(--text-primary);
+}
+
+button, .btn {
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Status badges maintain their specific colors but adjust for dark mode */
+.status-open {
+  background-color: #4d3800;
+  color: #ffd966;
+}
+
+.status-in-progress {
+  background-color: #1a3a5a;
+  color: #90caf9;
+}
+
+.status-closed {
+  background-color: #5a1a1a;
+  color: #ffb3b3;
+}
+
+.status-delayed {
+  background-color: #4d3800;
+  color: #ffd966;
+}
+
+/* Chat interface */
+#chatbot-container {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+#chatbot-messages {
+  background-color: var(--bg-primary);
+}
+
+.message {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Forms */
+form {
+  background-color: var(--bg-secondary);
+}
+
+/* Footer */
+footer {
+  background-color: var(--nav-bg);
+  color: var(--text-secondary);
+}
+
+/* Ensure Google Translate widget is visible */
+.goog-te-gadget-simple {
+  background-color: transparent !important;
+}
+
+.goog-te-gadget-simple .goog-te-menu-value span {
+  color: #ffffff !important;
+}
+
+.goog-te-menu-value span {
+  color: #ffffff !important;
+}
+
+.goog-te-menu-value span:nth-child(3) {
+  color: #ffffff !important;
+}
+
+.goog-te-gadget-simple .goog-te-menu-value span:first-child,
+.goog-te-gadget-simple .goog-te-menu-value span:nth-child(2),
+.goog-te-gadget-simple .goog-te-menu-value span:nth-child(3) {
+  color: #ffffff !important;
+}
+
+/* Modal backgrounds */
+.modal, #chatbotReminderModal > div {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Modal inner content - form.html chatbot reminder */
+#chatbotReminderModal > div {
+  background-color: var(--bg-secondary) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
+}
+
+#chatbotReminderModal h3 {
+  color: var(--brand-primary) !important;
+}
+
+#chatbotReminderModal p {
+  color: var(--text-primary) !important;
+}
+
+/* Status page container */
+.container {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary);
+}
+
+.container h1 {
+  color: var(--text-primary);
+}
+
+.container h2 {
+  color: var(--brand-primary);
+}
+
+.container p {
+  color: var(--text-primary);
+}
+
+.container label {
+  color: var(--text-primary);
+}
+
+.container strong {
+  color: var(--text-primary);
+}
+
+/* Ticket box styling */
+.ticket-box {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Support page container */
+.support-container {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary);
+}
+
+.support-section {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Chatbot messages container */
+#chat-container {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.bot-message {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Articles homepage - cards */
+.article-card {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-color);
+}
+
+.article-card:hover {
+  background-color: #454545;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);
+}
+
+.article-description {
+  color: var(--text-secondary);
+}
+
+.articles-header p {
+  color: var(--text-secondary);
+}
+
+.articles-header {
+  border-bottom-color: var(--border-color);
+}
+
+/* Articles - specific article pages */
+.article-container {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.breadcrumb {
+  color: var(--text-secondary);
+}
+
+.article-header {
+  border-bottom-color: var(--border-color);
+}
+
+.article-meta {
+  color: var(--text-secondary);
+}
+
+.article-content h3 {
+  color: var(--text-primary);
+}
+
+.article-content p,
+.article-content li {
+  color: var(--text-primary);
+}
+
+/* Articles container background */
+.articles-container {
+  background-color: var(--bg-primary);
+}
+
+.articles-container .info-box {
+  background-color: var(--info-bg);
+  border-color: var(--info-border);
+  color: var(--info-text);
+}
+
+.category-title {
+  border-bottom-color: var(--border-color);
+}
+
+/* Private notes styling */
+.info-box[style*="background: #fff3cd"] {
+  background-color: #4d3800 !important;
+  border-color: #6b4f00 !important;
+}
+
+textarea[style*="background: #fffbf0"] {
+  background-color: #3a2d00 !important;
+  border-color: #6b4f00 !important;
+  color: var(--text-primary) !important;
+}
+
+/* Support page specific styling */
+.info-box h3 {
+  color: var(--brand-primary);
+}
+
+.info-box strong,
+.email-link {
+  color: var(--brand-primary);
+}
+
+.warning strong {
+  color: var(--warning-text);
+}
+
+/* Dark mode toggle icon treatment */
+#dark-mode-toggle-icon {
+  transition: filter 0.2s ease;
+}
+
+#dark-mode-toggle-icon {
+  filter: brightness(0) invert(1);
+}

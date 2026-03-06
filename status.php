@@ -24,7 +24,7 @@ if ($ticketId !== '') {
     }
     // Redirect specific IDs to login page
     elseif ($ticketId === '263450' || $ticketId === '263497') {
-        header('Location: login.php');
+        header('Location: tech/login.php');
         exit;
     }
 }
@@ -33,9 +33,21 @@ if ($ticketId !== '' && !$notFound) {
     // Use prepared statement for safety
     $priorityCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'priority'");
     $has_priority = $priorityCheck && $priorityCheck->num_rows > 0;
+    
+    $chromebookSnCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'chromebook_sn'");
+    $has_chromebook_sn = $chromebookSnCheck && $chromebookSnCheck->num_rows > 0;
+    
+    $pickedUpCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'picked_up'");
+    $has_picked_up = $pickedUpCheck && $pickedUpCheck->num_rows > 0;
+    
+    $pickupDateCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'pickup_date'");
+    $has_pickup_date = $pickupDateCheck && $pickupDateCheck->num_rows > 0;
 
     $select_cols = "id, first_name, last_name, status, notes, date_reported, problem_category, custom_detail";
     if ($has_priority) { $select_cols .= ", priority"; }
+    if ($has_chromebook_sn) { $select_cols .= ", chromebook_sn"; }
+    if ($has_picked_up) { $select_cols .= ", picked_up"; }
+    if ($has_pickup_date) { $select_cols .= ", pickup_date"; }
 
     $stmt = $conn->prepare("SELECT $select_cols FROM tickets WHERE id = ? LIMIT 1");
     $stmt->bind_param('i', $ticketId);
@@ -56,7 +68,8 @@ if ($ticketId !== '' && !$notFound) {
 <meta charset="utf-8">
 <title>Check Ticket Status</title>
 <link rel="icon" type="image/svg+xml" href="img/buc.svg">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/dark-mode.css">
 <style>
 :root{ --brand: #800000; }
 body{ background: var(--brand); color:#fff; }
@@ -93,6 +106,7 @@ nav a.active{ background: rgba(255,255,255,0.15); }
     <a href="status.php" class="active">Ticket Status</a>
     <a href="chatbot.html">Chatbot</a>
     <a href="articles/index.html">Articles</a>
+    <a href="support.html">Support</a>
     <div id="google_translate_element" style="margin-left: auto;"></div>
   </div>
 </nav>    <div class="container">
@@ -114,8 +128,10 @@ nav a.active{ background: rgba(255,255,255,0.15); }
             <p><strong>Date reported:</strong> <?php echo date('M d, Y', strtotime($ticket['date_reported'])); ?></p>
             <p><strong>Problem:</strong> <?php echo htmlspecialchars($ticket['problem_category']); ?></p>
             <?php if (!empty($ticket['custom_detail'])): ?><p><strong>Details:</strong> <?php echo htmlspecialchars($ticket['custom_detail']); ?></p><?php endif; ?>
+            <?php if (!empty($ticket['chromebook_sn'])): ?><p><strong>Chromebook SN:</strong> <?php echo htmlspecialchars($ticket['chromebook_sn']); ?></p><?php endif; ?>
+            <?php if (!empty($ticket['picked_up'])): ?><p><strong>Picked Up:</strong> <?php echo htmlspecialchars($ticket['picked_up']); ?></p><?php endif; ?>
+            <?php if (!empty($ticket['picked_up']) && $ticket['picked_up'] === 'Yes' && !empty($ticket['pickup_date'])): ?><p><strong>Pickup Date:</strong> <?php echo date('M d, Y', strtotime($ticket['pickup_date'])); ?></p><?php endif; ?>
             <?php if (!empty($ticket['notes'])): ?><p><strong>Notes:</strong> <?php echo nl2br(htmlspecialchars($ticket['notes'])); ?></p><?php endif; ?>
-            <?php if (!empty($ticket['priority'])): ?><p><strong>Priority:</strong> <?php echo htmlspecialchars($ticket['priority']); ?></p><?php endif; ?>
             <p><a href="form.html">Submit a new ticket</a></p>
         </div>
         <?php elseif ($notFound): ?>
@@ -138,6 +154,16 @@ nav a.active{ background: rgba(255,255,255,0.15); }
         </script>
         <?php endif; ?>
     </div>
-</body>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,es,zh-CN,ar,fr,de,it,ja,ko,pt,ru,vi',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  </body>
 </html>
 <?php $conn->close(); ?>

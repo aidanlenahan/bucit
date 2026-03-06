@@ -1,0 +1,11 @@
+DirectoryIndex login.php
+
+RewriteEngine On
+
+# Direct /tech/ requests to login
+RewriteRule ^$ login.php [R=302,L]
+
+# Soft gate: if no session cookie, send to login for any non-login page in /tech
+RewriteCond %{REQUEST_URI} /tech/(?!login\.php$).+
+RewriteCond %{HTTP_COOKIE} !(^|;\s*)PHPSESSID= [NC]
+RewriteRule ^ login.php [R=302,L]

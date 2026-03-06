@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
   <title>Chromebook Tech Support Chatbot</title>
   <link rel="icon" type="image/svg+xml" href="img/buc.svg">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/dark-mode.css">
   <style>
     main {
       width: 600px;
@@ -158,6 +159,7 @@
       <a href="status.php" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Ticket Status</a>
       <a href="chatbot.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; background: rgba(255,255,255,0.15);">Chatbot</a>
       <a href="articles/index.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Articles</a>
+      <a href="support.html" style="color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Support</a>
       <div id="google_translate_element" style="margin-left: auto;"></div>
     </div>
   </nav>
@@ -466,5 +468,15 @@
     // Start the chat when page loads
     startChat();
   </script>
-</body>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,es,zh-CN,ar,fr,de,it,ja,ko,pt,ru,vi',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  </body>
 </html>
