@@ -1,4 +1,4 @@
 <?php
-// Compatibility stub: renamed to change_password.php
-header('Location: change_password.php');
+// Compatibility stub: renamed to tech/change_password.php
+header('Location: tech/change_password.php');
 exit();

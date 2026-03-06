@@ -14,19 +14,19 @@
 1. **vendor/autoload.php** - Custom autoloader for PHPMailer
 2. **includes/email_config.php** - SMTP credentials configuration
 3. **includes/functions.php** - Email sending functions
-4. **close_ticket.php** - Standalone ticket closing script with email integration
+4. **tech/close_ticket.php** - Standalone ticket closing script with email integration
 5. **test_email.php** - Test script to verify email setup
 
 ### Integration Added:
 
-- Added "Close Ticket & Send Email" button to **edit_ticket.php**
+- Added "Close Ticket & Send Email" button to **tech/edit_ticket.php**
 - Automatically sends professional HTML email when tickets are closed
 - Includes ticket details and resolution notes in email
 
 ### How to Use:
 
 #### Option 1: Use the Close Ticket Button (Recommended)
-1. Open any ticket in `edit_ticket.php`
+1. Open any ticket in `tech/edit_ticket.php`
 2. Click the "✓ Close Ticket & Send Email" button
 3. Fill in the resolution notes
 4. Submit to close ticket and send email automatically

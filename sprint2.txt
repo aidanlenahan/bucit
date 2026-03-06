@@ -1,0 +1,75 @@
+Choose two tasks from your project that you want to work on for the next week.  List them in the order you wish to complete them in. 
+
+1. Database enhancement we added Chromebook Serial Number tracking, private Tech Notes, and pickup tracking
+2. Form and Display Logic Updates - Update all pages to properly handle new fields
+
+You will work on the project every class period and for 30 minutes per week outside of class.
+
+Answer the following questions each time you work on your project in this document.
+
+Date of work session
+What is your goal for this work session?(To be completed before class starts)
+Proof you worked toward your goal
+Keep track of websites you used for reference.
+List any problems you encountered.
+Link to the github repo or repl your code has been uploaded to.
+https://github.com/aidanlenahan/bucit
+
+2/12
+- Implemented translate to Spanish feature Google integration
+- Debugging translation feature
+- Added and updated the intake form
+- Worked on inventory system
+2/13
+- Worked out chatbot bugs
+
+
+
+2/17
+
+Did you accomplish your goal or make progress?
+Yes
+- Edit form properly handles all new fields
+- Public status page shows appropriate fields
+- Management dashboard displays pickup status
+
+What is your goal for next class?(Should be completed at the end of class)
+Implement the loaner Chromebook tracking system. This should include:
+- Loaner inventory table (device IDs, serial numbers, condition)
+- Link loaners to tickets when issued
+- Track loaner check-out and return dates
+
+1. SN tracking
+   - Enables asset management and warranty lookup
+   - Displayed to students in status.php for verification
+   - Searchable field in ticket management
+
+2. Private technician notes
+   - Separate from public-facing notes
+   - Highlighted in yellow in edit form with warning label
+
+3. Pickup tracking
+   - Yes/No dropdown for pickup status
+   - Automatic date when marked as picked up
+
+
+2/18
+- Added a support page
+- Updated navbar with support page references
+
+
+2/19
+- Debugging translation feature
+- Dark mode
+- Translation feature now works on all pages somewhat reliably
+- Dark mode loading times
+
+At the end of each week(either Thursday or Friday)we will meet or you will create a video of your progress at home. I will grade you on the progress you made during that week.
+
+Your journal should be up to date and your code on either github or repl.
+		
+
+
+
+
+

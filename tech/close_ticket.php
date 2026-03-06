@@ -3,12 +3,12 @@
  * Close Ticket Script
  * Handles closing tickets and sending email notifications
  */
-require_once __DIR__ . '/includes/db_config.php';
+require_once __DIR__ . '/../includes/db_config.php';
 
 // Connection is already established in db_config.php as $conn
 
 // Include email functions
-require_once 'includes/functions.php';
+require_once __DIR__ . '/../includes/functions.php';
 
 // Start session
 if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -18,7 +18,7 @@ $current_tech = $_SESSION['tech_user'] ?? null;
 
 // Check if technician is logged in
 if (empty($current_tech)) {
-    header('Location: tech_login.php');
+    header('Location: login.php');
     exit();
 }
 
@@ -46,11 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $ticket_id) {
     <!DOCTYPE html>
     <html lang="en">
     <head>
-        <meta charset="UTF-8">
+                <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Close Ticket #<?php echo htmlspecialchars($ticket['id']); ?></title>
-        <link rel="icon" type="image/svg+xml" href="img/buc.svg">
-        <link rel="stylesheet" href="styles.css">
+        <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
+        <link rel="stylesheet" href="../css/styles.css">
+        <link rel="stylesheet" href="../css/dark-mode.css">
         <style>
             .close-ticket-container {
                 max-width: 800px;
@@ -155,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $ticket_id) {
                 </div>
             </form>
         </div>
-    </body>
+            </body>
     </html>
     <?php
     exit();

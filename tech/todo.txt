@@ -1,0 +1,181 @@
+actually let's make it so when user visits any tech page when unauthenticated, it first goes to the 403 page with a login button to login.php
+
+
+COMPLETED:
+✓ Update form/database
+    ✓ Chromebook SN
+    ✓ Private tech notes
+    ✓ remove level of priority from status.php
+    ✓ Picked up (true/false)
+    ✓ Pick up date
+✓ print tickets
+✓ mark as picked up
+✓ inventory system (basic version complete)
+
+================================================================================
+HIGH PRIORITY - NEXT SPRINT:
+================================================================================
+
+1. LOANER CHROMEBOOK SYSTEM
+   - Create loaner_devices table (serial #, condition, status)
+   - Link loaner to ticket when issued
+   - Track check-out date and expected return date
+   - Automated email reminders for overdue loaners
+   - Dashboard showing available vs checked-out loaners
+   - Quick "Issue Loaner" button on ticket page
+
+2. WARRANTY LOOKUP INTEGRATION
+   - Link Chromebook SN to Dell warranty API
+   - Display warranty status on ticket page
+   - Show warranty expiration date
+   - Flag out-of-warranty devices
+   - Cache warranty data to reduce API calls
+
+3. USER ACCESS MANAGEMENT
+   - Create front desk user role (limited permissions)
+   - Barry gets full admin access
+   - Front desk can: view tickets, mark as picked up, issue loaners
+   - Front desk cannot: edit tech notes, delete tickets, modify inventory
+   - Role-based menu system
+
+4. ENHANCED CHATBOT
+   - Walk through common self-fixes before ticket submission
+   - Battery troubleshooting flow
+   - Screen issues diagnostic
+   - Keyboard problems guide
+   - WiFi connectivity wizard
+   - "Still need help?" → creates pre-filled ticket
+
+================================================================================
+MEDIUM PRIORITY:
+================================================================================
+
+5. SPANISH TRANSLATION
+   - Google Translate widget on all public pages
+   - Pre-translate common phrases
+   - Bilingual email templates
+   - Language preference in ticket submission
+
+6. AUTOMATED EMAIL NOTIFICATIONS
+   - Email when ticket status changes
+   - Email when device ready for pickup
+   - Email reminder if not picked up after 3 days
+   - Weekly digest for students with open tickets
+
+7. STUDENT DASHBOARD
+   - Students log in with school email
+   - View all their tickets in one place
+   - Upload photos of device issues
+   - Chat with assigned technician
+
+8. TECHNICIAN LEADERBOARD ENHANCEMENTS
+   - Points for loaner management
+   - Bonus points for same-day closures
+   - Monthly/weekly/all-time views
+   - Achievement badges (50 tickets, 100 tickets, etc.)
+
+9. IMPROVED SEARCH & FILTERS
+   - Search by Chromebook SN
+   - Filter by date range
+   - Filter by problem category
+   - Filter by assigned tech
+   - Filter by pickup status
+   - Save custom filter presets
+
+10. REPORTING & ANALYTICS
+    - Generate weekly/monthly reports
+    - Most common problems
+    - Average resolution time
+    - Peak hours/days for ticket submission
+    - Parts usage statistics
+    - Tech performance metrics
+    - Export to PDF/Excel
+
+================================================================================
+NICE-TO-HAVE FEATURES:
+================================================================================
+
+11. QR CODE SYSTEM
+    - Generate QR code for each ticket
+    - Students scan to check status
+    - Print QR code on claim ticket
+    - QR code on Chromebook stickers for quick lookup
+
+12. TEXT MESSAGE NOTIFICATIONS
+    - SMS when ready for pickup
+    - Requires phone number collection
+    - Use Twilio API integration
+
+13. PHOTO UPLOAD
+    - Students upload photos of damage
+    - Attach to ticket automatically
+    - Before/after repair photos
+    - Store in /uploads/ directory
+
+14. CALENDAR INTEGRATION
+    - Schedule repair appointments
+    - Block out tech availability
+    - Send calendar invites
+    - Show busy/available times
+
+15. KNOWLEDGE BASE ARTICLES (expand current)
+    - WiFi connectivity troubleshooting
+    - How to restart properly
+    - Keyboard cleaning guide
+    - Screen care and cleaning
+    - Battery optimization tips
+    - Login issues resolution
+    - Trackpad problems
+    - Audio issues
+    - Video with step-by-step guides
+
+16. TICKET TEMPLATES
+    - Common repair scenarios
+    - Pre-filled diagnostic questions
+    - Quick ticket creation for walk-ins
+    - Bulk ticket creation for classroom issues
+
+17. PARTS ORDERING AUTOMATION
+    - Auto-suggest parts when inventory low
+    - Integration with supplier API
+    - Track pending orders
+    - Alert when shipment arrives
+
+18. STUDENT FEEDBACK SYSTEM
+    - Rate service after ticket closed
+    - Comments on repair quality
+    - Tech-specific ratings (anonymous)
+    - Display aggregate satisfaction score
+
+19. MOBILE APP
+    - Native iOS/Android app
+    - Push notifications
+    - Camera integration for photos
+    - Offline ticket creation
+
+20. ADVANCED CHATBOT (AI-powered)
+    - Use ChatGPT/Claude API
+    - Natural language problem description
+    - Intelligent troubleshooting suggestions
+    - Learn from past ticket resolutions
+    - Escalate to human when needed
+
+================================================================================
+TECHNICAL IMPROVEMENTS:
+================================================================================
+
+- Add input validation and sanitization everywhere
+- Implement CSRF token protection on forms
+- Add database connection pooling
+- Optimize slow queries with indexes
+- Implement caching for frequently accessed data
+- Add comprehensive error logging
+- Create automated backup system
+- Set up development/staging/production environments
+- Write unit tests for critical functions
+- Add API endpoints for mobile app
+- Implement rate limiting on public forms
+- Add captcha to prevent spam tickets
+- Compress and minify CSS/JS files
+- Implement lazy loading for ticket lists
+- Add websockets for real-time updates

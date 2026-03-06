@@ -1,5 +1,5 @@
 <?php
-// new_inventory.php - Add new parts to inventory
+// tech/new_inventory.php - Add new parts to inventory
 require_once __DIR__ . '/../includes/db_config.php';
 
 // Connection is already established in db_config.php as $conn
@@ -10,7 +10,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 $current_tech = $_SESSION['tech_user'] ?? null;
 if (empty($current_tech)) {
-    header('Location: tech_login.php');
+    header('Location: ../tech/login.php');
     exit();
 }
 
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($stmt->execute()) {
             $success_message = "Part added successfully!";
             // Redirect to inventory page after 2 seconds
-            header("refresh:2;url=inventory.php");
+            header("refresh:2;url=../tech/inventory.php");
         } else {
             $error_message = "Error adding part: " . $conn->error;
         }
@@ -48,7 +48,7 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Part - Inventory</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
     <style>
         :root {
             --brand: #800000;
@@ -196,7 +196,7 @@ $conn->close();
                 <p style="margin: 5px 0 0 0;">Add a new part to inventory</p>
             </div>
             <div>
-                <a href="inventory.php" class="back-link">← Back to Inventory</a>
+                <a href="../tech/inventory.php" class="back-link">← Back to Inventory</a>
             </div>
         </div>
 
@@ -237,7 +237,7 @@ $conn->close();
                 </div>
 
                 <button type="submit" class="btn">Add Part</button>
-                <a href="inventory.php" class="btn btn-secondary">Cancel</a>
+                <a href="../tech/inventory.php" class="btn btn-secondary">Cancel</a>
             </form>
         </div>
     </div>

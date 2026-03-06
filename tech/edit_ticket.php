@@ -1,6 +1,6 @@
 <?php
 // edit_ticket.php - View and edit individual support tickets
-require_once __DIR__ . '/includes/db_config.php';
+require_once __DIR__ . '/../includes/db_config.php';
 
 // Connection is already established in db_config.php as $conn
 
@@ -26,6 +26,18 @@ $has_restarted = ($restartedCheck && $restartedCheck->num_rows > 0);
 // Check whether tech column exists so UI can adapt
 $techCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'tech'");
 $has_tech = ($techCheck && $techCheck->num_rows > 0);
+// Check whether chromebook_sn column exists
+$chromebookSnCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'chromebook_sn'");
+$has_chromebook_sn = ($chromebookSnCheck && $chromebookSnCheck->num_rows > 0);
+// Check whether private_notes column exists
+$privateNotesCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'private_notes'");
+$has_private_notes = ($privateNotesCheck && $privateNotesCheck->num_rows > 0);
+// Check whether picked_up column exists
+$pickedUpCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'picked_up'");
+$has_picked_up = ($pickedUpCheck && $pickedUpCheck->num_rows > 0);
+// Check whether pickup_date column exists
+$pickupDateCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'pickup_date'");
+$has_pickup_date = ($pickupDateCheck && $pickupDateCheck->num_rows > 0);
 
 // Default point values for Bucit Ranked (per category)
 $bucit_point_defaults = [
@@ -391,6 +403,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($has_tech) {
             $tech = trim($_POST['tech'] ?? ($ticket['tech'] ?? ''));
         }
+        $chromebook_sn = null;
+        if ($has_chromebook_sn) {
+            $chromebook_sn = trim($_POST['chromebook_sn'] ?? '');
+        }
+        $private_notes = null;
+        if ($has_private_notes) {
+            $private_notes = trim($_POST['private_notes'] ?? '');
+        }
+        $picked_up = null;
+        if ($has_picked_up) {
+            $picked_up = $_POST['picked_up'] ?? 'No';
+        }
+        $pickup_date = null;
+        if ($has_pickup_date) {
+            $pickup_date = trim($_POST['pickup_date'] ?? '');
+            // If picked_up is No, clear the pickup_date
+            if ($picked_up === 'No') {
+                $pickup_date = null;
+            }
+        }
 
         // If ticket is being Closed, force priority to 5 so closed tickets don't interfere with priority sorting
         if ($has_priority && strcasecmp(trim($status), 'Closed') === 0) {
@@ -428,6 +460,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($has_tech) {
             $fields[] = 'tech = ?';
             $params[] = $tech;
+            $types .= 's';
+        }
+
+        if ($has_chromebook_sn) {
+            $fields[] = 'chromebook_sn = ?';
+            $params[] = $chromebook_sn;
+            $types .= 's';
+        }
+
+        if ($has_private_notes) {
+            $fields[] = 'private_notes = ?';
+            $params[] = $private_notes;
+            $types .= 's';
+        }
+
+        if ($has_picked_up) {
+            $fields[] = 'picked_up = ?';
+            $params[] = $picked_up;
+            $types .= 's';
+        }
+
+        if ($has_pickup_date) {
+            $fields[] = 'pickup_date = ?';
+            $params[] = $pickup_date;
             $types .= 's';
         }
 
@@ -488,11 +544,12 @@ $stmt->close();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+        <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Ticket #<?php echo htmlspecialchars($ticket['id']); ?></title>
-    <link rel="icon" type="image/svg+xml" href="img/buc.svg">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
     <style>
         /* Theme variables */
         :root { --brand: #800000; --brand-dark: #5a0000; --card-bg: rgba(255,255,255,0.98); }
@@ -719,7 +776,7 @@ $stmt->close();
                 <h1>Ticket #<?php echo htmlspecialchars($ticket['id']); ?></h1>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <button type="button" onclick="window.print()" class="btn" style="background: var(--brand); padding: 8px 16px;" title="Print Ticket">
-                        <img src="img/print.png" alt="Print" style="width: 16px; height: 16px; vertical-align: middle; filter: brightness(0) invert(1); margin-right: 6px;">
+                        <img src="../img/print.png" alt="Print" style="width: 16px; height: 16px; vertical-align: middle; filter: brightness(0) invert(1); margin-right: 6px;">
                         Print Ticket
                     </button>
                     <span class="status-badge status-<?php echo strtolower(str_replace(' ', '-', $ticket['status'] ?? 'open')); ?>">
@@ -786,6 +843,27 @@ $stmt->close();
                 </div>
                 <?php endif; ?>
                 
+                <?php if ($has_chromebook_sn && !empty($ticket['chromebook_sn'])): ?>
+                <div class="detail-item">
+                    <div class="detail-label">Chromebook SN</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($ticket['chromebook_sn']); ?></div>
+                </div>
+                <?php endif; ?>
+                
+                <?php if ($has_picked_up): ?>
+                <div class="detail-item">
+                    <div class="detail-label">Picked Up</div>
+                    <div class="detail-value"><?php echo htmlspecialchars($ticket['picked_up'] ?? 'No'); ?></div>
+                </div>
+                <?php endif; ?>
+                
+                <?php if ($has_pickup_date && !empty($ticket['pickup_date']) && $ticket['picked_up'] === 'Yes'): ?>
+                <div class="detail-item">
+                    <div class="detail-label">Pickup Date</div>
+                    <div class="detail-value"><?php echo date('F d, Y', strtotime($ticket['pickup_date'])); ?></div>
+                </div>
+                <?php endif; ?>
+                
                 <div class="detail-item" style="grid-column: 1 / -1;">
                     <div class="detail-label">Problem Category</div>
                     <div class="detail-value"><?php echo htmlspecialchars($ticket['problem_category']); ?></div>
@@ -816,6 +894,15 @@ $stmt->close();
                 <div class="detail-item" style="grid-column: 1 / -1;">
                     <div class="detail-label">Admin Notes</div>
                     <div class="detail-value"><?php echo nl2br(htmlspecialchars($ticket['notes'])); ?></div>
+                </div>
+                <?php endif; ?>
+                
+                <?php if ($has_private_notes && $ticket['private_notes']): ?>
+                <div class="detail-item" style="grid-column: 1 / -1;">
+                    <div class="detail-label">Private Tech Notes</div>
+                    <div class="detail-value" style="background: #fff3cd; padding: 10px; border-radius: 4px; border-left: 4px solid #ffc107;">
+                        <?php echo nl2br(htmlspecialchars($ticket['private_notes'])); ?>
+                    </div>
                 </div>
                 <?php endif; ?>
             </div>
@@ -855,6 +942,13 @@ $stmt->close();
                     <label for="school_email">School Email</label>
                     <input type="email" id="school_email" name="school_email" value="<?php echo htmlspecialchars($ticket['school_email'] ?? ''); ?>">
                 </div>
+
+                <?php if ($has_chromebook_sn): ?>
+                <div class="form-group">
+                    <label for="chromebook_sn">Chromebook Serial Number</label>
+                    <input type="text" id="chromebook_sn" name="chromebook_sn" value="<?php echo htmlspecialchars($ticket['chromebook_sn'] ?? ''); ?>" placeholder="Enter Chromebook SN">
+                </div>
+                <?php endif; ?>
 
                 <div class="form-group">
                     <label for="additional_info">Additional Information</label>
@@ -963,10 +1057,46 @@ $stmt->close();
                     </select>
                 </div>
                 
+                <?php if ($has_picked_up): ?>
+                <div class="form-group">
+                    <label for="picked_up">Picked Up</label>
+                    <select id="picked_up" name="picked_up" onchange="togglePickupDate(this.value)">
+                        <option value="No" <?php echo (empty($ticket['picked_up']) || $ticket['picked_up'] == 'No') ? 'selected' : ''; ?>>No</option>
+                        <option value="Yes" <?php echo (!empty($ticket['picked_up']) && $ticket['picked_up'] == 'Yes') ? 'selected' : ''; ?>>Yes</option>
+                    </select>
+                </div>
+                <?php endif; ?>
+                
+                <?php if ($has_pickup_date): ?>
+                <div class="form-group" id="pickup_date_group" style="<?php echo (empty($ticket['picked_up']) || $ticket['picked_up'] == 'No') ? 'display: none;' : ''; ?>">
+                    <label for="pickup_date">Pickup Date</label>
+                    <input type="date" id="pickup_date" name="pickup_date" value="<?php echo htmlspecialchars($ticket['pickup_date'] ?? ''); ?>">
+                </div>
+                <script>
+                function togglePickupDate(value) {
+                    var group = document.getElementById('pickup_date_group');
+                    if (group) {
+                        group.style.display = (value === 'Yes') ? 'block' : 'none';
+                        if (value === 'No') {
+                            document.getElementById('pickup_date').value = '';
+                        }
+                    }
+                }
+                </script>
+                <?php endif; ?>
+                
                 <div class="form-group">
                     <label for="notes">Admin Notes</label>
                     <textarea id="notes" name="notes" placeholder="Add notes about this ticket..."><?php echo htmlspecialchars($ticket['notes'] ?? ''); ?></textarea>
                 </div>
+                
+                <?php if ($has_private_notes): ?>
+                <div class="form-group">
+                    <label for="private_notes">Private Tech Notes</label>
+                    <textarea id="private_notes" name="private_notes" placeholder="Private notes not visible to students..." style="background: #fffbf0; border-left: 4px solid #ffc107;"><?php echo htmlspecialchars($ticket['private_notes'] ?? ''); ?></textarea>
+                    <small style="color: #856404;">⚠️ These notes will NOT be displayed in status.php to students</small>
+                </div>
+                <?php endif; ?>
                 
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <button type="submit" class="btn btn-success">Update Ticket</button>
@@ -1176,7 +1306,7 @@ $stmt->close();
             }
         });
     </script>
-</body>
+    </body>
 </html>
 
 <?php

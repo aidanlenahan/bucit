@@ -5,7 +5,7 @@ if (empty($_SESSION['tech_user']) || $_SESSION['tech_user'] !== 'jmilonas') {
     header('Location: login.php');
     exit();
 }
-require_once __DIR__ . '/includes/db_config.php';
+require_once __DIR__ . '/../includes/db_config.php';
 
 // Connection is already established in db_config.php as $conn
 
@@ -137,7 +137,7 @@ if ($res) {
 }
 $conn->close();
 ?><!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Admin - Technicians</title><link rel="icon" type="image/svg+xml" href="img/buc.svg"><link rel="stylesheet" href="styles.css">
+<html><head><meta charset="utf-8"><title>Admin - Technicians</title><link rel="icon" type="image/svg+xml" href="../img/buc.svg"><link rel="stylesheet" href="../css/styles.css"><link rel="stylesheet" href="../css/dark-mode.css">
 <style>
 body { background: #f5f5f5; }
 .admin-container { max-width: 1200px; margin: 30px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }

@@ -66,7 +66,7 @@ Color coding for quantities:
 
 ### Attaching Parts to Tickets
 
-1. Open a ticket in edit mode (edit_ticket.php)
+1. Open a ticket in edit mode (tech/edit_ticket.php)
 2. Scroll down to the "Replacement Parts" section
 3. If parts are already attached, they'll be listed in a table
 4. To attach new parts:
@@ -127,7 +127,7 @@ Important notes:
 
 **Parts don't appear in the dropdown**
 - Check that the part has quantity > 0
-- Refresh the edit_ticket.php page
+- Refresh the tech/edit_ticket.php page
 - Verify the part exists in the inventory table
 
 ## Future Enhancements (Optional)

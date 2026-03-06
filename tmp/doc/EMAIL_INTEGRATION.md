@@ -12,17 +12,17 @@ Your email functionality has been fully configured and integrated into the BUCIT
 - **includes/functions.php** - Email sending functions
 
 ### User-Facing Scripts
-- **close_ticket.php** - Dedicated ticket closing script with email notification
+- **tech/close_ticket.php** - Dedicated ticket closing script with email notification
 - **test_email.php** - Test script to verify email configuration
 
 ### Modified Files
-- **edit_ticket.php** - Added "Close Ticket & Send Email" button
+- **tech/edit_ticket.php** - Added "Close Ticket & Send Email" button
 
 ## How to Use
 
 ### Method 1: Using the Close Ticket Button (Recommended)
 
-1. Navigate to any ticket in `edit_ticket.php`
+1. Navigate to any ticket in `tech/edit_ticket.php`
 2. Click the green "✓ Close Ticket & Send Email" button
 3. Fill in the resolution notes explaining how the issue was fixed
 4. Check/uncheck "Send email notification to student" as needed

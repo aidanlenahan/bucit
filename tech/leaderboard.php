@@ -8,7 +8,7 @@ if (empty($_SESSION['tech_user'])) {
 $current_user = $_SESSION['tech_user'];
 $is_admin = ($current_user === 'jmilonas');
 
-require_once __DIR__ . '/includes/db_config.php';
+require_once __DIR__ . '/../includes/db_config.php';
 
 // Connection is already established in db_config.php as $conn
 
@@ -167,11 +167,12 @@ $conn->close();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+        <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bucit Ranked</title>
-    <link rel="icon" type="image/svg+xml" href="img/buc.svg">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
     <style>
         :root { --brand: #800000; --brand-dark: #5a0000; }
         body {
