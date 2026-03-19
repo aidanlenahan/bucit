@@ -1,5 +1,6 @@
 <?php
 // edit_ticket.php - View and edit individual support tickets
+require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/db_config.php';
 
 // Connection is already established in db_config.php as $conn
@@ -16,6 +17,10 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 $current_tech = $_SESSION['tech_user'] ?? null;
+if (empty($current_tech)) {
+    header('Location: login.php');
+    exit();
+}
 
 // Check whether priority column exists so UI can adapt
 $priorityCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'priority'");
@@ -141,6 +146,13 @@ if ($result->num_rows == 0) {
 $ticket = $result->fetch_assoc();
 $stmt->close();
 
+$is_admin = ($current_tech === 'jmilonas');
+$ticket_assigned_tech = $has_tech ? trim((string)($ticket['tech'] ?? '')) : '';
+$is_ticket_unassigned = $has_tech ? ($ticket_assigned_tech === '') : true;
+$is_ticket_assigned_to_current = $has_tech ? ($ticket_assigned_tech === $current_tech) : true;
+$can_pickup_ticket = $has_tech ? ($is_admin || $is_ticket_unassigned) : false;
+$can_edit_ticket = $has_tech ? ($is_admin || $is_ticket_assigned_to_current) : true;
+
 $current_ticket_tech = $ticket['tech'] ?? '';
 if (!empty($current_ticket_tech) && !isset($tech_display_lookup[$current_ticket_tech])) {
     $tech_options[] = [
@@ -196,8 +208,22 @@ if ($attached_query) {
 
 // Handle form submission for updates
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    verify_csrf_or_die();
+
+    $requested_pickup = isset($_POST['pickup']);
+    if ($requested_pickup && !$can_pickup_ticket) {
+        http_response_code(403);
+        $error_message = 'You are not allowed to pick up this ticket.';
+    } elseif (!$requested_pickup && !$can_edit_ticket) {
+        http_response_code(403);
+        $error_message = 'You are not allowed to modify this ticket.';
+    }
+
     // Handle part removal
-    if (isset($_POST['remove_part'])) {
+    if (isset($error_message)) {
+        // Authorization failure already handled.
+    }
+    elseif (isset($_POST['remove_part'])) {
         $part_attachment_id = intval($_POST['remove_part']);
         
         // Get part info before removing
@@ -540,6 +566,13 @@ if ($result->num_rows == 0) {
 $ticket = $result->fetch_assoc();
 $stmt->close();
 
+$is_admin = ($current_tech === 'jmilonas');
+$ticket_assigned_tech = $has_tech ? trim((string)($ticket['tech'] ?? '')) : '';
+$is_ticket_unassigned = $has_tech ? ($ticket_assigned_tech === '') : true;
+$is_ticket_assigned_to_current = $has_tech ? ($ticket_assigned_tech === $current_tech) : true;
+$can_pickup_ticket = $has_tech ? ($is_admin || $is_ticket_unassigned) : false;
+$can_edit_ticket = $has_tech ? ($is_admin || $is_ticket_assigned_to_current) : true;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -549,7 +582,6 @@ $stmt->close();
     <title>Edit Ticket #<?php echo htmlspecialchars($ticket['id']); ?></title>
     <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/dark-mode.css">
     <style>
         /* Theme variables */
         :root { --brand: #800000; --brand-dark: #5a0000; --card-bg: rgba(255,255,255,0.98); }
@@ -910,14 +942,21 @@ $stmt->close();
         
         <div class="ticket-management">
             <h2>Update Ticket</h2>
-            <?php if (!empty($current_tech) && (empty($ticket['tech']) || $ticket['tech'] !== $current_tech)): ?>
+            <?php if (!$can_edit_ticket): ?>
+                <div class="alert alert-danger">This ticket is assigned to another technician. You have read-only access.</div>
+            <?php endif; ?>
+
+            <?php if ($can_pickup_ticket && !$can_edit_ticket): ?>
                 <form method="POST" style="display:inline-block; margin-bottom:10px;">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
                     <input type="hidden" name="pickup" value="1">
                     <button type="submit" class="btn">Pick up ticket</button>
                 </form>
             <?php endif; ?>
 
+            <?php if ($can_edit_ticket): ?>
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
                 <div class="form-group">
                     <label for="first_name">First Name</label>
                     <input id="first_name" name="first_name" value="<?php echo htmlspecialchars($ticket['first_name'] ?? ''); ?>">
@@ -1128,6 +1167,7 @@ $stmt->close();
                                 </div>
                             </div>
                             <form method="POST" style="margin: 0;" onsubmit="return confirm('Remove this part and return it to inventory?');">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
                                 <input type="hidden" name="remove_part" value="<?php echo $part['id']; ?>">
                                 <button type="submit" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;" title="Remove Part">✕</button>
                             </form>
@@ -1139,6 +1179,7 @@ $stmt->close();
                 
                 <?php if (!empty($inventory_parts)): ?>
                 <form method="POST" style="margin-top: 20px;">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
                     <input type="hidden" name="attach_parts" value="1">
                     <h4>Attach Parts to This Ticket</h4>
                     
@@ -1221,6 +1262,7 @@ $stmt->close();
                 <p style="color: #666;">No parts currently available in inventory. <a href="inventory.php">Add parts to inventory</a></p>
                 <?php endif; ?>
             </div>
+            <?php endif; ?>
         </div>
     </div>
     

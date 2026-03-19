@@ -46,22 +46,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 if (isset($conn)) {
-    $conn->close();
+        $conn->close();
 }
 ?><!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Technician Login</title><link rel="icon" type="image/svg+xml" href="../img/buc.svg"><link rel="stylesheet" href="../css/styles.css"><link rel="stylesheet" href="../css/dark-mode.css"></head><body>
-<div style="max-width:420px;margin:40px auto;background:#fff;padding:20px;border-radius:8px">
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Technician Login</title>
+<link rel="icon" type="image/svg+xml" href="../img/buc.svg">
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="login-page">
+<main class="login-card">
 <h2>Technician Login</h2>
-<?php if ($error): ?><div style="color:#721c24;background:#f8d7da;padding:10px;border-radius:4px"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-<form method="POST">
-  <label>Username</label>
-  <input name="username" autofocus required>
-  <label>Password</label>
-  <input name="password" type="password" required>
-  <div style="margin-top:12px">
-    <button type="submit" class="btn">Log in</button>
-    <a href="../index.html" style="margin-left:8px">Back</a>
-  </div>
+<?php if ($error): ?><div class="login-alert"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+<form method="POST" class="login-form">
+    <label for="username">Username</label>
+    <input id="username" name="username" autofocus required>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" required>
+    <div class="login-actions">
+        <button type="submit" class="btn">Log in</button>
+        <a href="../index.html" class="login-back-link">Back</a>
+    </div>
 </form>
-</div>
-</body></html>
+</main>
+</body>
+</html>

@@ -10,7 +10,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 $current_tech = $_SESSION['tech_user'] ?? null;
 if (empty($current_tech)) {
-    header('Location: login.php');
+    header('Location: ../403.html');
     exit();
 }
 
@@ -35,6 +35,12 @@ $has_picked_up = false;
 $pickedUpCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'picked_up'");
 if ($pickedUpCheck && $pickedUpCheck->num_rows > 0) {
     $has_picked_up = true;
+}
+// Check whether chromebook_sn column exists
+$has_chromebook_sn = false;
+$chromebookSnCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'chromebook_sn'");
+if ($chromebookSnCheck && $chromebookSnCheck->num_rows > 0) {
+    $has_chromebook_sn = true;
 }
 
 // Validate sorting parameters
@@ -63,6 +69,12 @@ $next_order = ($order == 'ASC') ? 'DESC' : 'ASC';
 
 // Filters and pagination
 $search = trim($_GET['q'] ?? '');
+$chromebook_sn_filter = trim($_GET['chromebook_sn'] ?? '');
+$date_from = trim($_GET['date_from'] ?? '');
+$date_to = trim($_GET['date_to'] ?? '');
+$problem_category_filter = trim($_GET['problem_category'] ?? '');
+$assigned_tech_filter = trim($_GET['assigned_tech'] ?? '');
+$pickup_status_filter = trim($_GET['pickup_status'] ?? '');
 $priority_filter = $_GET['priority'] ?? '';
 $per_page = $_GET['per_page'] ?? '25';
 $page = max(1, intval($_GET['page'] ?? 1));
@@ -73,6 +85,25 @@ if (!in_array((string)$per_page, $allowed_per_page)) {
     $per_page = '25';
 }
 
+// Validate/normalize date filters
+if ($date_from !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_from)) {
+    $date_from = '';
+}
+if ($date_to !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_to)) {
+    $date_to = '';
+}
+if ($date_from !== '' && strtotime($date_from) === false) {
+    $date_from = '';
+}
+if ($date_to !== '' && strtotime($date_to) === false) {
+    $date_to = '';
+}
+
+// Validate pickup status filter
+if (!in_array($pickup_status_filter, ['', 'Yes', 'No'], true)) {
+    $pickup_status_filter = '';
+}
+
 // Build WHERE clause from filters
 $where_clauses = [];
 if ($priority_filter !== '' && is_numeric($priority_filter)) {
@@ -80,9 +111,53 @@ if ($priority_filter !== '' && is_numeric($priority_filter)) {
         $where_clauses[] = "priority = " . intval($priority_filter);
     }
 }
+if ($has_chromebook_sn && $chromebook_sn_filter !== '') {
+    $escaped_sn = $conn->real_escape_string($chromebook_sn_filter);
+    $where_clauses[] = "chromebook_sn LIKE '%" . $escaped_sn . "%'";
+}
+if ($date_from !== '') {
+    $escaped_date_from = $conn->real_escape_string($date_from);
+    $where_clauses[] = "date_reported >= '" . $escaped_date_from . "'";
+}
+if ($date_to !== '') {
+    $escaped_date_to = $conn->real_escape_string($date_to);
+    $where_clauses[] = "date_reported <= '" . $escaped_date_to . "'";
+}
+if ($problem_category_filter !== '') {
+    $escaped_category = $conn->real_escape_string($problem_category_filter);
+    $where_clauses[] = "problem_category = '" . $escaped_category . "'";
+}
+if ($has_tech && $assigned_tech_filter !== '') {
+    if ($assigned_tech_filter === '__unassigned__') {
+        $where_clauses[] = "(tech IS NULL OR tech = '')";
+    } else {
+        $escaped_tech = $conn->real_escape_string($assigned_tech_filter);
+        $where_clauses[] = "tech = '" . $escaped_tech . "'";
+    }
+}
+if ($has_picked_up && $pickup_status_filter !== '') {
+    $escaped_pickup = $conn->real_escape_string($pickup_status_filter);
+    $where_clauses[] = "picked_up = '" . $escaped_pickup . "'";
+}
 if ($search !== '') {
     $escaped = $conn->real_escape_string($search);
-    $where_clauses[] = "(id = '" . $escaped . "' OR first_name LIKE '%" . $escaped . "%' OR last_name LIKE '%" . $escaped . "%' OR school_id LIKE '%" . $escaped . "%' OR problem_category LIKE '%" . $escaped . "%' OR problem_detail LIKE '%" . $escaped . "%' OR custom_detail LIKE '%" . $escaped . "%' OR status LIKE '%" . $escaped . "%')";
+    $search_parts = [
+        "id = '" . $escaped . "'",
+        "first_name LIKE '%" . $escaped . "%'",
+        "last_name LIKE '%" . $escaped . "%'",
+        "school_id LIKE '%" . $escaped . "%'",
+        "problem_category LIKE '%" . $escaped . "%'",
+        "problem_detail LIKE '%" . $escaped . "%'",
+        "custom_detail LIKE '%" . $escaped . "%'",
+        "status LIKE '%" . $escaped . "%'"
+    ];
+    if ($has_chromebook_sn) {
+        $search_parts[] = "chromebook_sn LIKE '%" . $escaped . "%'";
+    }
+    if ($has_tech) {
+        $search_parts[] = "tech LIKE '%" . $escaped . "%'";
+    }
+    $where_clauses[] = "(" . implode(' OR ', $search_parts) . ")";
 }
 $where_sql = '';
 if (count($where_clauses) > 0) {
@@ -113,6 +188,9 @@ if ($has_tech) {
 if ($has_picked_up) {
     $select_columns .= ", picked_up";
 }
+if ($has_chromebook_sn) {
+    $select_columns .= ", chromebook_sn";
+}
 
 $order_by_sql = "$sort_by $order";
 // If sorting by priority, ensure closed tickets are always last so they don't get in the way
@@ -128,6 +206,25 @@ $result = $conn->query($sql);
 $success = $_GET['success'] ?? null;
 $ticket_id = $_GET['ticket_id'] ?? null;
 
+// Build dropdown options for filters
+$problem_categories = [];
+$problemCategoryResult = $conn->query("SELECT DISTINCT problem_category FROM tickets WHERE problem_category IS NOT NULL AND problem_category <> '' ORDER BY problem_category ASC");
+if ($problemCategoryResult) {
+    while ($categoryRow = $problemCategoryResult->fetch_assoc()) {
+        $problem_categories[] = $categoryRow['problem_category'];
+    }
+}
+
+$assigned_tech_options = [];
+if ($has_tech) {
+    $techResult = $conn->query("SELECT DISTINCT tech FROM tickets WHERE tech IS NOT NULL AND tech <> '' ORDER BY tech ASC");
+    if ($techResult) {
+        while ($techRow = $techResult->fetch_assoc()) {
+            $assigned_tech_options[] = $techRow['tech'];
+        }
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -137,7 +234,6 @@ $ticket_id = $_GET['ticket_id'] ?? null;
     <title>Support Ticket Management</title>
     <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/dark-mode.css">
     <style>
         /* Theme variables */
         :root { --brand: #800000; --brand-dark: #5a0000; --card-bg: rgba(255,255,255,0.98); }
@@ -239,13 +335,18 @@ $ticket_id = $_GET['ticket_id'] ?? null;
         .filter-bar {
             margin: 25px 0 15px;
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 12px;
-            align-items: center;
             background: #f8f9fa;
             padding: 12px 16px;
             border-radius: 8px;
             border: 1px solid #dee2e6;
+        }
+
+        .filter-bar-top {
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
 
         .filter-field {
@@ -261,7 +362,8 @@ $ticket_id = $_GET['ticket_id'] ?? null;
         }
 
         .filter-bar select,
-        .filter-bar input[type="text"] {
+        .filter-bar input[type="text"],
+        .filter-bar input[type="date"] {
             padding: 6px 10px;
             border: 1px solid #ced4da;
             border-radius: 4px;
@@ -286,6 +388,46 @@ $ticket_id = $_GET['ticket_id'] ?? null;
             flex: 1 1 auto;
             min-width: 200px;
             height: 36px;
+        }
+
+        .filter-toggle-btn {
+            background: #6c757d;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 7px 8px;
+            height: 36px;
+            width: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            align-self: center;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+            white-space: nowrap;
+            flex: 0 0 auto;
+            flex-shrink: 0;
+        }
+
+        .filter-toggle-btn:hover {
+            background: #5a6268;
+        }
+
+        .filter-contents {
+            display: none;
+            flex-wrap: wrap;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .filter-contents.visible {
+            display: flex;
+        }
+
+        .filter-bar .search-group {
+            flex: 1 1 auto;
+            min-width: 260px;
         }
 
         .search-btn {
@@ -524,31 +666,88 @@ $ticket_id = $_GET['ticket_id'] ?? null;
             <input type="hidden" name="sort" value="<?php echo htmlspecialchars($sort_by); ?>">
             <input type="hidden" name="order" value="<?php echo htmlspecialchars($order); ?>">
 
-            <div class="filter-field">
-                <label for="per-page-select">Rows per page</label>
-                <select id="per-page-select" name="per_page" onchange="this.form.submit()" style="width:80px;">
-                    <?php foreach(['10','15','25','50','100','all'] as $opt): ?>
-                    <option value="<?php echo $opt; ?>" <?php echo ($per_page == $opt) ? 'selected': ''; ?>><?php echo ($opt=='all')? 'All' : $opt; ?></option>
-                    <?php endforeach; ?>
-                </select>
+            <div class="filter-bar-top">
+                <button type="button" id="filter-toggle-btn" class="filter-toggle-btn">Filters</button>
+                <div class="search-group">
+                    <input id="search-input" type="text" name="q" placeholder="Search name, ID, problem..." value="<?php echo htmlspecialchars($search); ?>">
+                    <button type="submit" class="search-btn" title="Search">🔍</button>
+                </div>
+                <a href="manage_tickets.php" class="btn" style="padding:8px 12px; font-size:13px; flex-shrink:0;">Clear Filters</a>
             </div>
 
-            <?php if ($has_priority): ?>
-            <div class="filter-field">
-                <label for="priority-select">Priority</label>
-                <select id="priority-select" name="priority" onchange="this.form.submit()" style="width:140px;">
-                    <option value="">All</option>
-                    <option value="1" <?php echo ($priority_filter === '1')?'selected':''; ?>>1 — Urgent</option>
-                    <option value="2" <?php echo ($priority_filter === '2')?'selected':''; ?>>2 — High</option>
-                    <option value="3" <?php echo ($priority_filter === '3')?'selected':''; ?>>3 — Normal</option>
-                    <option value="4" <?php echo ($priority_filter === '4')?'selected':''; ?>>4 — Low</option>
-                </select>
-            </div>
-            <?php endif; ?>
+            <div class="filter-contents">
+                <div class="filter-field">
+                    <label for="per-page-select">Rows per page</label>
+                    <select id="per-page-select" name="per_page" onchange="this.form.submit()" style="width:80px;">
+                        <?php foreach(['10','15','25','50','100','all'] as $opt): ?>
+                        <option value="<?php echo $opt; ?>" <?php echo ($per_page == $opt) ? 'selected': ''; ?>><?php echo ($opt=='all')? 'All' : $opt; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
-            <div class="search-group">
-                <input id="search-input" type="text" name="q" placeholder="Search name, ID, problem..." value="<?php echo htmlspecialchars($search); ?>">
-                <button type="submit" class="search-btn" title="Search">🔍</button>
+                <?php if ($has_priority): ?>
+                <div class="filter-field">
+                    <label for="priority-select">Priority</label>
+                    <select id="priority-select" name="priority" onchange="this.form.submit()" style="width:140px;">
+                        <option value="">All</option>
+                        <option value="1" <?php echo ($priority_filter === '1')?'selected':''; ?>>1 — Urgent</option>
+                        <option value="2" <?php echo ($priority_filter === '2')?'selected':''; ?>>2 — High</option>
+                        <option value="3" <?php echo ($priority_filter === '3')?'selected':''; ?>>3 — Normal</option>
+                        <option value="4" <?php echo ($priority_filter === '4')?'selected':''; ?>>4 — Low</option>
+                    </select>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($has_chromebook_sn): ?>
+                <div class="filter-field">
+                    <label for="chromebook-sn-input">Chromebook SN</label>
+                    <input id="chromebook-sn-input" type="text" name="chromebook_sn" value="<?php echo htmlspecialchars($chromebook_sn_filter); ?>" placeholder="Search SN" style="width:170px;">
+                </div>
+                <?php endif; ?>
+
+                <div class="filter-field">
+                    <label for="date-from-input">Date From</label>
+                    <input id="date-from-input" type="date" name="date_from" value="<?php echo htmlspecialchars($date_from); ?>">
+                </div>
+
+                <div class="filter-field">
+                    <label for="date-to-input">Date To</label>
+                    <input id="date-to-input" type="date" name="date_to" value="<?php echo htmlspecialchars($date_to); ?>">
+                </div>
+
+                <div class="filter-field">
+                    <label for="category-select">Category</label>
+                    <select id="category-select" name="problem_category" onchange="this.form.submit()" style="width:170px;">
+                        <option value="">All</option>
+                        <?php foreach ($problem_categories as $category): ?>
+                        <option value="<?php echo htmlspecialchars($category); ?>" <?php echo ($problem_category_filter === $category) ? 'selected' : ''; ?>><?php echo htmlspecialchars($category); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <?php if ($has_tech): ?>
+                <div class="filter-field">
+                    <label for="assigned-tech-select">Assigned Tech</label>
+                    <select id="assigned-tech-select" name="assigned_tech" onchange="this.form.submit()" style="width:170px;">
+                        <option value="">All</option>
+                        <option value="__unassigned__" <?php echo ($assigned_tech_filter === '__unassigned__') ? 'selected' : ''; ?>>Unassigned</option>
+                        <?php foreach ($assigned_tech_options as $tech_name): ?>
+                        <option value="<?php echo htmlspecialchars($tech_name); ?>" <?php echo ($assigned_tech_filter === $tech_name) ? 'selected' : ''; ?>><?php echo htmlspecialchars($tech_name); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($has_picked_up): ?>
+                <div class="filter-field">
+                    <label for="pickup-status-select">Pickup Status</label>
+                    <select id="pickup-status-select" name="pickup_status" onchange="this.form.submit()" style="width:140px;">
+                        <option value="">All</option>
+                        <option value="Yes" <?php echo ($pickup_status_filter === 'Yes') ? 'selected' : ''; ?>>Picked Up</option>
+                        <option value="No" <?php echo ($pickup_status_filter === 'No') ? 'selected' : ''; ?>>Not Picked Up</option>
+                    </select>
+                </div>
+                <?php endif; ?>
             </div>
         </form>
         
@@ -725,10 +924,18 @@ $ticket_id = $_GET['ticket_id'] ?? null;
             const statCards = document.querySelectorAll('.stat-card[data-status], .stat-card[data-reset]');
             const searchInput = document.getElementById('search-input');
             const filterForm = document.getElementById('ticket-filter-form');
+            const filterToggleBtn = document.getElementById('filter-toggle-btn');
+            const filterContents = document.querySelector('.filter-contents');
 
-            if (!searchInput || !filterForm) {
+            if (!searchInput || !filterForm || !filterToggleBtn || !filterContents) {
                 return;
             }
+
+            // Toggle filter visibility
+            filterToggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                filterContents.classList.toggle('visible');
+            });
 
             statCards.forEach(function(card) {
                 card.addEventListener('click', function() {

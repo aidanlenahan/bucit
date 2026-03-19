@@ -5,6 +5,7 @@ if (empty($_SESSION['tech_user']) || $_SESSION['tech_user'] !== 'jmilonas') {
     header('Location: login.php');
     exit();
 }
+require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/db_config.php';
 
 // Connection is already established in db_config.php as $conn
@@ -13,6 +14,8 @@ require_once __DIR__ . '/../includes/db_config.php';
 $message = '';
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf_or_die();
+
     if (isset($_POST['toggle_active']) && isset($_POST['id'])) {
         $id = intval($_POST['id']);
         $stmt = $conn->prepare('UPDATE technicians SET active = 1 - active WHERE id = ?');
@@ -137,7 +140,12 @@ if ($res) {
 }
 $conn->close();
 ?><!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Admin - Technicians</title><link rel="icon" type="image/svg+xml" href="../img/buc.svg"><link rel="stylesheet" href="../css/styles.css"><link rel="stylesheet" href="../css/dark-mode.css">
+<html>
+<head>
+<meta charset="utf-8">
+<title>Admin - Technicians</title>
+<link rel="icon" type="image/svg+xml" href="../img/buc.svg">
+<link rel="stylesheet" href="../css/styles.css">
 <style>
 body { background: #f5f5f5; }
 .admin-container { max-width: 1200px; margin: 30px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -166,7 +174,8 @@ body { background: #f5f5f5; }
 label { color: #333; }
 input[type="text"], input[type="password"] { color: #333; }
 </style>
-</head><body>
+</head>
+<body>
 <div class="admin-container">
 <h2>Technician Account Management</h2>
 <p><small>Logged in as admin: <strong>jmilonas</strong> — <a href="manage_tickets.php">Back to Tickets</a> | <a href="logout.php">Log out</a></small></p>
@@ -199,6 +208,7 @@ input[type="text"], input[type="password"] { color: #333; }
 <td><?php echo date('M j, Y', strtotime($r['created_at'])); ?></td>
 <td>
     <form class="action-form" method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
         <input type="hidden" name="id" value="<?php echo $r['id']; ?>">
         <button name="toggle_active" class="action-btn btn-warning" type="submit" title="Enable/Disable account">
             <?php echo $r['active'] ? 'Disable' : 'Enable'; ?>
@@ -206,11 +216,13 @@ input[type="text"], input[type="password"] { color: #333; }
     </form>
     
     <form class="action-form" method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
         <input type="hidden" name="id" value="<?php echo $r['id']; ?>">
         <button name="reset_password" class="action-btn btn-primary" type="submit" title="Reset to 'changeme'">Reset PW</button>
     </form>
     
     <form class="action-form" method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
         <input type="hidden" name="id" value="<?php echo $r['id']; ?>">
         <button name="toggle_must_change" class="action-btn btn-secondary" type="submit" title="Toggle force password change">
             <?php echo $r['must_change_password'] ? 'Clear Must-Change' : 'Force Change'; ?>
@@ -219,6 +231,7 @@ input[type="text"], input[type="password"] { color: #333; }
     
     <?php if ($r['username'] !== 'jmilonas'): ?>
     <form class="action-form" method="POST" onsubmit="return confirm('Delete user <?php echo htmlspecialchars($r['username']); ?>? This cannot be undone.');">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
         <input type="hidden" name="id" value="<?php echo $r['id']; ?>">
         <button name="delete_user" class="action-btn btn-danger" type="submit" title="Delete user">Delete</button>
     </form>
@@ -226,6 +239,7 @@ input[type="text"], input[type="password"] { color: #333; }
     
     <div class="password-form">
         <form method="POST" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
             <input type="hidden" name="id" value="<?php echo $r['id']; ?>">
             <input type="password" name="new_password" placeholder="New password..." required style="width:150px;">
             <label><input type="checkbox" name="force_change" value="1"> Force change</label>
@@ -240,6 +254,7 @@ input[type="text"], input[type="password"] { color: #333; }
 
 <h3 style="margin-top: 30px;">Create New Technician</h3>
 <form method="POST" style="max-width: 500px;">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
 <div style="margin-bottom: 10px;">
     <label for="display_name" style="display: block; margin-bottom: 4px; font-weight: 600;">Full Display Name</label>
     <input type="text" id="display_name" name="display_name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
