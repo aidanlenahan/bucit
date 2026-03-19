@@ -10,6 +10,7 @@ require_once __DIR__ . '/../includes/db_config.php';
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
+require_once __DIR__ . '/../includes/security.php';
 $current_tech = $_SESSION['tech_user'] ?? null;
 if (empty($current_tech)) {
     header('Location: login.php');
@@ -21,6 +22,8 @@ $error_message = '';
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    verify_csrf_or_die();
+
     $part_name = trim($_POST['part_name'] ?? '');
     $part_number = trim($_POST['part_number'] ?? '');
     $quantity = intval($_POST['quantity'] ?? 0);
@@ -59,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Add New Part - BucIT Support</title>
     <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/dark-mode.css">
     <style>
         :root {
             --brand: #800000;
@@ -280,6 +282,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
 
             <form method="POST" action="new_inventory.php">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
                 <div class="form-group">
                     <label for="part_name">Part Name <span class="required">*</span></label>
                     <input 

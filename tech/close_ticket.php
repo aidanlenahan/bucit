@@ -14,7 +14,15 @@ require_once __DIR__ . '/../includes/functions.php';
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
+require_once __DIR__ . '/../includes/security.php';
 $current_tech = $_SESSION['tech_user'] ?? null;
+$is_admin = ($current_tech === 'jmilonas');
+
+$has_tech = false;
+$techCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'tech'");
+if ($techCheck && $techCheck->num_rows > 0) {
+    $has_tech = true;
+}
 
 // Check if technician is logged in
 if (empty($current_tech)) {
@@ -40,6 +48,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $ticket_id) {
         echo "Ticket not found.";
         exit();
     }
+
+    if ($has_tech && !$is_admin) {
+        $assigned_tech = trim((string)($ticket['tech'] ?? ''));
+        if ($assigned_tech === '' || $assigned_tech !== $current_tech) {
+            http_response_code(403);
+            echo "You are not allowed to close this ticket.";
+            exit();
+        }
+    }
     
     // Display form
     ?>
@@ -51,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $ticket_id) {
         <title>Close Ticket #<?php echo htmlspecialchars($ticket['id']); ?></title>
         <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
         <link rel="stylesheet" href="../css/styles.css">
-        <link rel="stylesheet" href="../css/dark-mode.css">
         <style>
             .close-ticket-container {
                 max-width: 800px;
@@ -136,6 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $ticket_id) {
             </div>
             
             <form method="POST" action="close_ticket.php">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
                 <input type="hidden" name="ticket_id" value="<?php echo htmlspecialchars($ticket['id']); ?>">
                 
                 <div class="form-group">
@@ -164,6 +181,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $ticket_id) {
 
 // Handle POST request - close the ticket
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $ticket_id) {
+    verify_csrf_or_die();
+
     // Validate ticket exists
     $stmt = $conn->prepare("SELECT * FROM tickets WHERE id = ?");
     $stmt->bind_param('i', $ticket_id);
@@ -175,14 +194,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $ticket_id) {
     if (!$ticket) {
         die("Ticket not found.");
     }
-    
-    // Check if ticket has required columns
-    $has_tech = false;
-    $techCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'tech'");
-    if ($techCheck && $techCheck->num_rows > 0) {
-        $has_tech = true;
+
+    if ($has_tech && !$is_admin) {
+        $assigned_tech = trim((string)($ticket['tech'] ?? ''));
+        if ($assigned_tech === '' || $assigned_tech !== $current_tech) {
+            http_response_code(403);
+            die("You are not allowed to close this ticket.");
+        }
     }
     
+    // Check if ticket has required columns
     $has_priority = false;
     $priorityCheck = $conn->query("SHOW COLUMNS FROM tickets LIKE 'priority'");
     if ($priorityCheck && $priorityCheck->num_rows > 0) {

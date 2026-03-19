@@ -10,3 +10,9 @@ includes/db_config.php
 # IDE files
 .vscode/
 .idea/
+
+# Database and deployment scripts
+phpscripts/
+
+# Temporary files and directories
+tmp/

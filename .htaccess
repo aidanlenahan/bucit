@@ -1,6 +1,10 @@
-ErrorDocument 404 /bucit/404.html
-ErrorDocument 403 /bucit/403.html
-ErrorDocument 500 /bucit/500.html
+# Disable directory browsing globally
+Options -Indexes
+
+# Error document handlers
+ErrorDocument 404 /404.html
+ErrorDocument 403 /403.html
+ErrorDocument 500 /500.html
 
 RewriteEngine On
 

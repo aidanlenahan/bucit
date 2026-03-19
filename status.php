@@ -69,7 +69,6 @@ if ($ticketId !== '' && !$notFound) {
 <title>Check Ticket Status</title>
 <link rel="icon" type="image/svg+xml" href="img/buc.svg">
 <link rel="stylesheet" href="css/styles.css">
-<link rel="stylesheet" href="css/dark-mode.css">
 <style>
 :root{ --brand: #800000; }
 body{ background: var(--brand); color:#fff; }

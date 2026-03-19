@@ -8,6 +8,7 @@ require_once __DIR__ . '/../includes/db_config.php';
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
+require_once __DIR__ . '/../includes/security.php';
 $current_tech = $_SESSION['tech_user'] ?? null;
 if (empty($current_tech)) {
     header('Location: login.php');
@@ -19,6 +20,8 @@ $error_message = '';
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    verify_csrf_or_die();
+
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'update':
@@ -123,7 +126,6 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
     <title>Inventory Management - BucIT Support</title>
     <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/dark-mode.css">
     <style>
         :root {
             --brand: #800000;
@@ -522,12 +524,14 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
                                     <td class="action-buttons">
                                         <div class="quick-adjust">
                                             <form method="POST" style="display: inline;">
+                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
                                                 <input type="hidden" name="action" value="adjust_quantity">
                                                 <input type="hidden" name="part_id" value="<?php echo $item['id']; ?>">
                                                 <input type="hidden" name="adjustment" value="1">
                                                 <button type="submit" class="btn btn-success btn-small">+1</button>
                                             </form>
                                             <form method="POST" style="display: inline;">
+                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
                                                 <input type="hidden" name="action" value="adjust_quantity">
                                                 <input type="hidden" name="part_id" value="<?php echo $item['id']; ?>">
                                                 <input type="hidden" name="adjustment" value="-1">
@@ -536,6 +540,7 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
                                             <button type="button" class="btn btn-small" onclick="openEditModal(<?php echo htmlspecialchars(json_encode($item)); ?>)">Edit</button>
                                             <form method="POST" style="display: inline;" 
                                                   onsubmit="return confirm('Are you sure you want to delete this part?');">
+                                                                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="part_id" value="<?php echo $item['id']; ?>">
                                                 <button type="submit" class="btn btn-danger btn-small">Delete</button>
@@ -560,6 +565,7 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
             </div>
             <form method="POST" action="inventory.php">
                 <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" id="edit_part_id" name="part_id">
                     

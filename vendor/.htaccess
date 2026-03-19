@@ -1,3 +1,8 @@
+# Disable directory browsing
+Options -Indexes
+RewriteEngine On
+
+# Deny all access
 Require all denied
-ErrorDocument 403 /bucit/403.html
-ErrorDocument 404 /bucit/404.html
+ErrorDocument 403 /403.html
+ErrorDocument 404 /404.html
