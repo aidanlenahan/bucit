@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin - Technicians</title>
+<link rel="icon" type="image/svg+xml" href="../img/buc.svg">
+<link rel="stylesheet" href="../css/styles.css">
+<style>
+body { background: #f5f5f5; }
+.admin-container { max-width: 1200px; margin: 30px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.admin-container h2, .admin-container h3, .admin-container p, .admin-container small, .admin-container a { color: #333; }
+.admin-container a { color: #800000; text-decoration: none; }
+.admin-container a:hover { text-decoration: underline; }
+.alert { padding: 10px; border-radius: 4px; margin-bottom: 12px; }
+.alert-success { background: #d4edda; color: #155724; }
+.alert-danger { background: #f8d7da; color: #721c24; }
+.tech-table { width: 100%; border-collapse: collapse; margin-top: 12px; background: #fff; }
+.tech-table th { background: #f5f5f5; padding: 10px; text-align: left; border-bottom: 2px solid #ddd; color: #333; font-weight: 600; }
+.tech-table td { padding: 10px; border-top: 1px solid #ddd; vertical-align: top; color: #333; }
+.tech-table tr:hover { background: #f9f9f9; }
+.action-btn { display: inline-block; padding: 6px 12px; margin: 2px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: 500; }
+.btn-primary { background: #800000; color: white; }
+.btn-warning { background: #ffc107; color: #333; }
+.btn-danger { background: #dc3545; color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+.action-form { display: inline-block; margin: 2px; }
+.password-form { background: #f9f9f9; padding: 8px; border-radius: 4px; margin-top: 6px; }
+.password-form input { padding: 4px 8px; margin-right: 6px; border: 1px solid #ccc; border-radius: 3px; }
+.password-form label { font-size: 12px; margin-left: 6px; color: #333; }
+.status-badge { padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; display: inline-block; }
+.badge-active { background: #d4edda; color: #155724; }
+.badge-inactive { background: #f8d7da; color: #721c24; }
+label { color: #333; }
+input[type="text"], input[type="password"] { color: #333; }
+</style>
+<style>
+.admin-container button, .password-form input[type="password"] { width: auto; }
+.admin-container form { background: transparent; }
+.admin-container .btn { width: auto; background: #800000; color: #fff; padding: 10px 20px; border: 0; border-radius: 4px; cursor: pointer; }
+</style>
+<script src="../js/seed-data.js"></script>
+<script src="../js/demo.js"></script>
+</head>
+<body>
+<div class="admin-container" id="app"></div>
+<script>
+  // Port of tech/admin_tech.php (admin only)
+  (function () {
+    const esc = Bucit.esc;
+    const session = Bucit.session();
+    if (!session || !Bucit.isAdmin(session.tech_user)) {
+      window.location.replace('login.html');
+      return;
+    }
+    const data = Bucit.db();
+    const admin = Bucit.adminUser();
+    const flash = Bucit.takeFlash() || {};
+
+    function finish(result) {
+      Bucit.save();
+      Bucit.setFlash(result);
+      window.location.reload();
+    }
+
+    const rows = data.technicians.slice().sort((a, b) => a.username.localeCompare(b.username));
+    document.getElementById('app').innerHTML = `<h2>Technician Account Management</h2>
+<p><small>Logged in as admin: <strong>${esc(admin)}</strong> — <a href="manage_tickets.html">Back to Tickets</a> | <a href="logout.html">Log out</a></small></p>
+${flash.message ? `<div class="alert alert-success">${esc(flash.message)}</div>` : ''}
+${flash.error ? `<div class="alert alert-danger">${esc(flash.error)}</div>` : ''}
+<div style="overflow-x:auto;"><table class="tech-table">
+<thead><tr><th>Username</th><th>Display Name</th><th>Status</th><th>Must Change PW</th><th>Created</th><th>Actions</th></tr></thead>
+<tbody>${rows.map((r) => `<tr>
+<td><strong>${esc(r.username)}</strong></td>
+<td>${esc(r.display_name || '')}</td>
+<td><span class="status-badge ${r.active ? 'badge-active' : 'badge-inactive'}">${r.active ? 'Active' : 'Inactive'}</span></td>
+<td>${r.must_change_password ? 'Yes' : 'No'}</td>
+<td>${esc(Bucit.formatDate(r.created_at, 'M j, Y'))}</td>
+<td>
+    <form class="action-form" data-id="${r.id}" data-action="toggle_active"><button class="action-btn btn-warning" type="submit" title="Enable/Disable account">${r.active ? 'Disable' : 'Enable'}</button></form>
+    <form class="action-form" data-id="${r.id}" data-action="reset_password"><button class="action-btn btn-primary" type="submit" title="Reset to 'changeme'">Reset PW</button></form>
+    <form class="action-form" data-id="${r.id}" data-action="toggle_must_change"><button class="action-btn btn-secondary" type="submit" title="Toggle force password change">${r.must_change_password ? 'Clear Must-Change' : 'Force Change'}</button></form>
+    ${r.username !== admin ? `<form class="action-form" data-id="${r.id}" data-action="delete_user" data-confirm="Delete user ${esc(r.username)}? This cannot be undone."><button class="action-btn btn-danger" type="submit" title="Delete user">Delete</button></form>` : ''}
+    <div class="password-form">
+        <form data-id="${r.id}" data-action="set_custom_password" style="display:inline;">
+            <input type="password" name="new_password" placeholder="New password..." required style="width:150px;">
+            <label><input type="checkbox" name="force_change" value="1" style="width:auto;"> Force change</label>
+            <button class="action-btn btn-primary" type="submit">Set</button>
+        </form>
+    </div>
+</td>
+</tr>`).join('')}</tbody>
+</table></div>
+
+<h3 style="margin-top: 30px;">Create New Technician</h3>
+<form data-action="create_user" style="max-width: 500px;">
+<div style="margin-bottom: 10px;">
+    <label for="display_name" style="display: block; margin-bottom: 4px; font-weight: 600;">Full Display Name</label>
+    <input type="text" id="display_name" name="display_name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    <small style="color: #666;">Username will be auto-generated (first initial + last name)</small>
+</div>
+<button class="btn" type="submit">Create Technician</button>
+</form>`;
+
+    document.querySelectorAll('form[data-action]').forEach((form) => {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (form.dataset.confirm && !window.confirm(form.dataset.confirm)) return;
+        const id = parseInt(form.dataset.id, 10);
+        const row = data.technicians.find((t) => t.id === id);
+        switch (form.dataset.action) {
+          case 'toggle_active':
+            if (row) row.active = row.active ? 0 : 1;
+            return finish({ message: 'Toggled active state.' });
+          case 'reset_password':
+            if (row) { row.password = 'changeme'; row.must_change_password = 1; }
+            return finish({ message: 'Password reset to "changeme" and must-change flag set.' });
+          case 'toggle_must_change':
+            if (row) row.must_change_password = row.must_change_password ? 0 : 1;
+            return finish({ message: 'Toggled must-change-password flag.' });
+          case 'set_custom_password': {
+            const pw = form.new_password.value;
+            const force = form.force_change.checked ? 1 : 0;
+            if (pw === '') return finish({ error: 'Password cannot be empty.' });
+            if (row) { row.password = pw; row.must_change_password = force; }
+            return finish({ message: 'Custom password set' + (force ? ' (must change on login)' : '') + '.' });
+          }
+          case 'delete_user':
+            if (!row) return finish({});
+            if (row.username === admin) return finish({ error: 'Cannot delete admin account.' });
+            data.technicians = data.technicians.filter((t) => t.id !== id);
+            return finish({ message: 'User deleted successfully.' });
+          case 'create_user': {
+            const display = form.display_name.value.trim();
+            if (display === '') return finish({ error: 'Display name cannot be empty.' });
+            const parts = display.split(/\s+/);
+            const first = parts[0] || '';
+            const last = parts[parts.length - 1] || '';
+            const base = (first.slice(0, 1) + last.replace(/[^a-z0-9]/gi, '')).toLowerCase();
+            let username = base;
+            let i = 1;
+            while (Bucit.techByUsername(username)) { i++; username = base + i; }
+            Bucit.insert('technicians', {
+              username, display_name: display, password: 'changeme', active: 1, must_change_password: 1, created_at: Bucit.nowSql(),
+            });
+            return finish({ message: 'User created: ' + username + ' (password: changeme)' });
+          }
+        }
+      });
+    });
+  })();
+</script>
+</body></html>

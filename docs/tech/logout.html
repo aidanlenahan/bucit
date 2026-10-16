@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Logging out...</title>
+<script src="../js/seed-data.js"></script>
+<script src="../js/demo.js"></script>
+<script>
+  // Port of tech/logout.php: destroy the session and go back to the login page
+  Bucit.logout();
+  window.location.replace('login.html');
+</script>
+</head>
+<body><p>Logging out... <a href="login.html">Continue</a></p></body>
+</html>

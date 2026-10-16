@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BucIT Kiosk - Check In/Out</title>
+    <link rel="icon" type="image/svg+xml" href="img/buc.svg">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/seed-data.js"></script>
+    <script src="js/demo.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--brand);
+            overflow-x: hidden;
+        }
+
+        .kiosk-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            min-height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .kiosk-header {
+            background: var(--brand);
+            color: white;
+            padding: 30px 24px;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .kiosk-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .kiosk-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .tab-navigation {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            background: #f5f5f5;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            background: transparent;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button:hover {
+            background: rgba(128, 0, 0, 0.05);
+        }
+
+        .tab-button.active {
+            color: var(--brand);
+            background: white;
+            border-bottom-color: var(--brand);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px 32px;
+            flex: 1;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .scan-section {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, rgba(128, 0, 0, 0.03), rgba(128, 0, 0, 0.08));
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 2px dashed var(--brand);
+        }
+
+        .scan-icon {
+            font-size: 80px;
+            color: var(--brand);
+            margin-bottom: 20px;
+        }
+
+        .scan-section h2 {
+            color: var(--brand);
+            margin: 0 0 10px 0;
+            font-size: 1.8em;
+        }
+
+        .scan-section p {
+            color: #666;
+            font-size: 1.2em;
+            margin: 0;
+        }
+
+        .barcode-input,
+        .student-id-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #d1d1d1;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .barcode-input:focus,
+        .student-id-input:focus,
+        .kiosk-form input:focus,
+        .kiosk-form select:focus,
+        .kiosk-form textarea:focus {
+            border-color: var(--brand);
+            outline: none;
+        }
+
+        .student-greeting {
+            display: none;
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--brand);
+        }
+
+        .student-greeting.active {
+            display: block;
+        }
+
+        .student-greeting h3 {
+            margin: 0 0 15px 0;
+            color: var(--brand);
+            font-size: 1.5em;
+        }
+
+        .student-greeting p {
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .student-greeting .not-you-link {
+            display: inline-block;
+            color: var(--brand);
+            text-decoration: none;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .student-greeting .not-you-link:hover {
+            text-decoration: underline;
+        }
+
+        .kiosk-form {
+            display: none;
+        }
+
+        .kiosk-form.active {
+            display: block;
+        }
+
+        .kiosk-form label {
+            display: block;
+            margin-bottom: 8px;
+            margin-top: 20px;
+            color: var(--brand);
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        .kiosk-form input,
+        .kiosk-form select,
+        .kiosk-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1d1d1;
+            border-radius: 6px;
+            font-size: 1.1em;
+            box-sizing: border-box;
+        }
+
+        .kiosk-form button,
+        .lookup-button {
+            width: 100%;
+            padding: 18px;
+            background: var(--brand);
+            color: white;
+            border: none;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .kiosk-form button:hover,
+        .lookup-button:hover {
+            background: var(--brand-dark);
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 60px 30px;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        .success-icon {
+            font-size: 100px;
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+
+        .success-message h2 {
+            color: var(--brand);
+            font-size: 2em;
+            margin: 0 0 20px 0;
+        }
+
+        .success-message p {
+            color: #666;
+            font-size: 1.3em;
+            margin: 10px 0;
+        }
+
+        .ticket-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--brand);
+            margin: 20px 0;
+        }
+
+        .restart-button {
+            padding: 15px 40px;
+            background: var(--brand);
+            color: white;
+            border: none;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 30px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .restart-button:hover {
+            background: var(--brand-dark);
+        }
+
+        .student-info-display {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .student-info-display p {
+            margin: 8px 0;
+            color: #333;
+            font-size: 1.05em;
+        }
+
+        .student-info-display strong {
+            color: var(--brand);
+        }
+
+        .form-message {
+            display: none;
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin: 0 0 20px 0;
+            font-weight: 600;
+        }
+
+        .form-message.active {
+            display: block;
+        }
+
+        .form-message.error {
+            background: #fdecea;
+            color: #8a1f17;
+            border-left: 4px solid #c0392b;
+        }
+
+        .form-message.success {
+            background: #edf7ed;
+            color: #1e6b35;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .inline-status {
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <div class="kiosk-container">
+        <div class="kiosk-header">
+            <h1>
+                <img src="img/buc.svg" alt="BucIT Logo" style="height: 48px; width: 48px;">
+                BucIT Kiosk
+            </h1>
+            <p>Chromebook Check In/Out System</p>
+        </div>
+
+        <div class="tab-navigation">
+            <button class="tab-button active" data-tab="checkin">Check In</button>
+            <button class="tab-button" data-tab="checkout">Check Out</button>
+        </div>
+
+        <div id="checkin-tab" class="tab-content active">
+            <div class="scan-section" id="checkin-scan">
+                <div class="scan-icon"><img src="img/barcode.png" alt="Barcode" style="max-width: 150px; height: auto;"></div>
+                <h2>Scan Your Student ID</h2>
+                <p>If you do not know or have your student ID, please manually fill out your information <a href="kiosk_manual.html">here</a>.</p>
+                <input type="text" class="barcode-input" id="checkin-barcode" placeholder="Waiting for Student ID..." autofocus>
+                <div class="inline-status">Press Enter if ID not submitting.</div>
+                <div class="inline-status">Demo: no scanner needed. Type a roster ID such as <strong>240101</strong> or <strong>240114</strong> and press Enter.</div>
+            </div>
+
+            <div class="student-greeting" id="checkin-greeting">
+                <h3>Hi <span id="checkin-student-name">Student</span>,</h3>
+                <p>Please review the Chromebook details and submit the check-in.</p>
+                <a href="kiosk.html" class="not-you-link">Not you?</a>
+            </div>
+
+            <form class="kiosk-form" id="checkin-form">
+                <div class="form-message" id="checkin-message"></div>
+
+                <div class="student-info-display">
+                    <p><strong>Student Name:</strong> <span id="checkin-display-name">Waiting for roster lookup</span></p>
+                    <p><strong>Student ID:</strong> <span id="checkin-display-id">Not scanned</span></p>
+                    <p><strong>Roster Status:</strong> <span id="checkin-display-email">Not loaded</span></p>
+                    <p><strong>Chromebook Serial:</strong> <span id="checkin-display-serial">Not scanned</span></p>
+                </div>
+
+                <label for="checkin-problem">Problem:</label>
+                <select id="checkin-problem" name="problem" required>
+                    <option value="" disabled selected>Select a problem</option>
+                    <option value="screen">Screen not working</option>
+                    <option value="battery">Battery issue</option>
+                    <option value="keyboard">Keyboard not working</option>
+                    <option value="wifi">WiFi connectivity</option>
+                    <option value="login">Can't log in</option>
+                    <option value="physical-damage">Physical damage</option>
+                    <option value="other">Other</option>
+                </select>
+
+                <div id="checkin-secondary-container"></div>
+
+                <label for="checkin-restarted">Have you restarted the computer?</label>
+                <select id="checkin-restarted" name="restarted" required>
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+
+                <label for="checkin-school-email">School Email:</label>
+                <input
+                    type="email"
+                    id="checkin-school-email"
+                    name="schoolEmail"
+                    required
+                    placeholder="yourname@school.edu"
+                    title="Enter a valid email address"
+                >
+
+                <label for="checkin-class-of">Class of:</label>
+                <input
+                    type="text"
+                    id="checkin-class-of"
+                    name="classOf"
+                    pattern="\d{1,4}"
+                    maxlength="4"
+                    inputmode="numeric"
+                    title="Numbers only (up to 4 digits)"
+                >
+
+                <label for="checkin-additional">Additional Information:</label>
+                <textarea id="checkin-additional" name="additionalInfo" rows="4" maxlength="120" placeholder="Please describe your issue in detail (max 120 characters)"></textarea>
+
+                <button type="submit">Submit Check-In</button>
+            </form>
+
+            <div class="success-message" id="checkin-success">
+                <div class="success-icon">✓</div>
+                <h2>Check-In Complete!</h2>
+                <p>Your ticket has been submitted successfully.</p>
+                <p class="ticket-number">Ticket #<span id="checkin-ticket-number">12345</span></p>
+                <p>Please wait for a technician to assist you.</p>
+                <button class="restart-button" onclick="resetCheckIn()">Start New Check-In</button>
+            </div>
+        </div>
+
+        <div id="checkout-tab" class="tab-content">
+            <div class="scan-section" id="checkout-scan">
+                <div class="scan-icon"><img src="img/barcode.png" alt="Barcode" style="max-width: 150px; height: auto;"></div>
+                <h2>Scan Your Student ID</h2>
+                <p>If you do not know your student ID, please talk to an available technician.</p>
+                <input type="text" class="barcode-input" id="checkout-barcode" placeholder="Waiting for Student ID  ...">
+                <div class="inline-status">Press Enter if ID not submitting.</div>
+                <div class="inline-status">Demo: check a Chromebook in first, then enter the same ID here to check it out.</div>
+            </div>
+
+            <div class="student-greeting" id="checkout-greeting">
+                <h3>Hi <span id="checkout-student-name">Student</span>,</h3>
+                <p>Please confirm your information below to check out your Chromebook.</p>
+                <a href="kiosk.html" class="not-you-link">Not you?</a>
+            </div>
+
+            <form class="kiosk-form" id="checkout-form">
+                <div class="form-message" id="checkout-message"></div>
+
+                <div class="student-info-display">
+                    <p><strong>Student Name:</strong> <span id="checkout-display-name">Waiting for ticket lookup</span></p>
+                    <p><strong>Student ID:</strong> <span id="checkout-display-id">Not loaded</span></p>
+                    <p><strong>School Email:</strong> <span id="checkout-display-email">Not provided</span></p>
+                    <p><strong>Chromebook Serial:</strong> <span id="checkout-display-serial">Not scanned</span></p>
+                    <p><strong>Ticket ID:</strong> <span id="checkout-display-ticket">Not loaded</span></p>
+                </div>
+
+                <label for="checkout-condition">Chromebook Condition:</label>
+                <select id="checkout-condition" name="condition" required>
+                    <option value="" disabled selected>Select condition</option>
+                    <option value="fixed">Fixed - Working properly</option>
+                    <option value="partially-fixed">Partially fixed - Some issues remain</option>
+                    <option value="not-fixed">Not fixed - Still has issues</option>
+                </select>
+
+                <label for="checkout-notes">Additional Notes (Optional):</label>
+                <textarea id="checkout-notes" name="notes" rows="4" maxlength="200" placeholder="Any additional feedback or concerns (max 200 characters)"></textarea>
+
+                <button type="submit">Complete Check-Out</button>
+            </form>
+
+            <div class="success-message" id="checkout-success">
+                <div class="success-icon">✓</div>
+                <h2>Check-Out Complete!</h2>
+                <p>Thank you for using BucIT Support.</p>
+                <p>Your ticket has been closed.</p>
+                <p class="ticket-number">Ticket #<span id="checkout-ticket-number">12345</span></p>
+                <button class="restart-button" onclick="resetCheckOut()">Start New Check-Out</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const kioskState = {
+            checkin: {
+                serial: '',
+                student: null,
+            },
+            checkout: {
+                ticket: null,
+            },
+        };
+        let checkinRedirectTimer = null;
+        const checkinSecondaryOptions = {
+            battery: ['Dies quickly', 'Does not charge', 'Something else'],
+            screen: ['Cracked', 'Black screen', 'Flickering display', 'Something else'],
+            keyboard: ['Key(s) stuck', 'Not typing', 'Keys missing', 'Something else'],
+            wifi: ["Can't connect", 'Drops connection', 'Slow speeds', 'Something else'],
+            login: ['Forgot password', 'Account locked', 'Something else'],
+            other: ['Something else'],
+            'physical-damage': ['Something else'],
+        };
+
+        function showMessage(id, message, type) {
+            const element = document.getElementById(id);
+            element.textContent = message;
+            element.className = `form-message active ${type}`;
+        }
+
+        function clearMessage(id) {
+            const element = document.getElementById(id);
+            element.textContent = '';
+            element.className = 'form-message';
+        }
+
+        // Demo stand-in for the JSON endpoints at the top of kiosk.html. Same validation
+        // rules and messages; reads/writes the browser demo database instead of MySQL.
+        function kioskHandle(action, request) {
+            const fail = (message) => { throw new Error(message); };
+            const str = (v) => String(v === undefined || v === null ? '' : v).trim();
+            const data = Bucit.db();
+            const findStudent = (id) => data.students.find((s) => s.student_id === id) || null;
+
+            if (action === 'lookup-student') {
+                const studentId = str(request.studentId);
+                if (studentId === '' || !/^\d{1,20}$/.test(studentId)) fail('Enter a valid student ID.');
+                const student = findStudent(studentId);
+                if (!student) fail('Student ID not found in the roster.');
+                return { success: true, student: { studentId: student.student_id, firstName: student.first_name, lastName: student.last_name, fullName: student.full_name } };
+            }
+
+            if (action === 'create-checkin-ticket') {
+                const studentId = str(request.studentId);
+                const serial = str(request.serial);
+                const problem = str(request.problem);
+                const subproblem = str(request.subproblem);
+                const customDetail = str(request.customDetail);
+                const restarted = str(request.restarted);
+                const schoolEmail = str(request.schoolEmail);
+                const classOf = str(request.classOf);
+                const additionalInfo = str(request.additionalInfo);
+
+                if (studentId === '' || !/^\d{1,20}$/.test(studentId)) fail('Student ID is required.');
+                if (serial === '' || serial.length > 50) fail('Student ID is required.');
+                const secondaryOptions = {
+                    battery: ['dies_quickly', 'does_not_charge', 'something_else'],
+                    screen: ['cracked', 'black_screen', 'flickering_display', 'something_else'],
+                    keyboard: ['key(s)_stuck', 'not_typing', 'keys_missing', 'something_else'],
+                    wifi: ["can't_connect", 'drops_connection', 'slow_speeds', 'something_else'],
+                    login: ['forgot_password', 'account_locked', 'something_else'],
+                    other: ['something_else'],
+                    'physical-damage': ['something_else'],
+                };
+                if (!secondaryOptions[problem]) fail('Select a valid problem.');
+                if (!secondaryOptions[problem].includes(subproblem)) fail('Select more details for the problem.');
+                if (subproblem === 'something_else' && customDetail === '') fail('Please specify additional details.');
+                if (restarted !== 'yes' && restarted !== 'no') fail('Select whether the Chromebook was restarted.');
+                if (schoolEmail === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(schoolEmail)) fail('Enter a valid school email.');
+                if (classOf !== '' && !/^\d{1,4}$/.test(classOf)) fail('Class of must be 1-4 digits.');
+
+                const student = findStudent(studentId);
+                if (!student) fail('Student ID not found in the roster.');
+
+                const ticket = Bucit.insert('tickets', {
+                    first_name: student.first_name,
+                    last_name: student.last_name,
+                    school_id: student.student_id,
+                    class_of: classOf === '' ? null : classOf,
+                    school_email: schoolEmail,
+                    additional_info: additionalInfo.slice(0, 120),
+                    date_reported: Bucit.todaySql(),
+                    problem_category: problem,
+                    problem_detail: subproblem,
+                    custom_detail: subproblem === 'something_else' ? customDetail.slice(0, 1000) : null,
+                    restarted: restarted === 'yes' ? 1 : 0,
+                    status: 'Open',
+                    notes: null,
+                    private_notes: null,
+                    priority: 3,
+                    tech: null,
+                    chromebook_sn: serial,
+                    picked_up: 'No',
+                    pickup_date: null,
+                    created_at: Bucit.nowSql(),
+                });
+                Bucit.save();
+                return { success: true, ticketId: ticket.id, student: { studentId: student.student_id, firstName: student.first_name, lastName: student.last_name } };
+            }
+
+            if (action === 'lookup-checkout-ticket') {
+                const serial = str(request.serial);
+                if (serial === '' || serial.length > 50) fail('Chromebook barcode is required.');
+                const ticket = data.tickets
+                    .filter((t) => t.chromebook_sn === serial && (!t.picked_up || t.picked_up === 'No') && t.status !== 'Closed')
+                    .sort((a, b) => b.id - a.id)[0];
+                if (!ticket) fail('No open ticket found for that Chromebook barcode.');
+                return { success: true, ticket: {
+                    ticketId: ticket.id,
+                    fullName: (ticket.first_name + ' ' + ticket.last_name).trim(),
+                    studentId: ticket.school_id,
+                    schoolEmail: ticket.school_email || 'Not provided',
+                    serial: ticket.chromebook_sn,
+                    status: ticket.status,
+                } };
+            }
+
+            if (action === 'complete-checkout') {
+                const ticketId = parseInt(request.ticketId, 10) || 0;
+                const condition = str(request.condition);
+                const notes = str(request.notes).slice(0, 200).trim();
+                if (ticketId <= 0) fail('Missing ticket ID.');
+                const conditionLabels = {
+                    fixed: 'Fixed - Working properly',
+                    'partially-fixed': 'Partially fixed - Some issues remain',
+                    'not-fixed': 'Not fixed - Still has issues',
+                };
+                if (!conditionLabels[condition]) fail('Select a valid checkout condition.');
+                const ticket = Bucit.ticketById(ticketId);
+                if (!ticket) fail('Ticket not found.');
+
+                const lines = [];
+                if (ticket.notes && ticket.notes.trim() !== '') lines.push(ticket.notes.trim());
+                lines.push('Checkout condition: ' + conditionLabels[condition]);
+                if (notes !== '') lines.push('Checkout notes: ' + notes);
+
+                ticket.status = 'Closed';
+                ticket.notes = lines.join('\n');
+                ticket.picked_up = 'Yes';
+                ticket.pickup_date = Bucit.todaySql();
+                Bucit.save();
+                return { success: true, ticketId };
+            }
+
+            fail('Unknown action.');
+        }
+
+        async function kioskRequest(action, payload) {
+            if (!action) {
+                throw new Error('Missing action.');
+            }
+            return kioskHandle(action, Object.assign({ action }, payload));
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach((button) => {
+                button.classList.toggle('active', button.dataset.tab === tabName);
+            });
+
+            document.querySelectorAll('.tab-content').forEach((content) => {
+                content.classList.toggle('active', content.id === `${tabName}-tab`);
+            });
+
+            if (tabName === 'checkin') {
+                resetCheckIn();
+            } else {
+                resetCheckOut();
+            }
+        }
+
+        document.querySelectorAll('.tab-button').forEach((button) => {
+            button.addEventListener('click', () => switchTab(button.dataset.tab));
+        });
+
+        const checkinProblemSelect = document.getElementById('checkin-problem');
+        const checkinSecondaryContainer = document.getElementById('checkin-secondary-container');
+
+        function renderCheckinSecondaryField() {
+            checkinSecondaryContainer.innerHTML = '';
+            const selectedProblem = checkinProblemSelect.value;
+            const options = checkinSecondaryOptions[selectedProblem];
+            if (!options) {
+                return;
+            }
+
+            const label = document.createElement('label');
+            label.textContent = 'More details:';
+            label.setAttribute('for', 'checkin-subproblem');
+
+            const secondary = document.createElement('select');
+            secondary.id = 'checkin-subproblem';
+            secondary.name = 'subproblem';
+            secondary.required = true;
+            secondary.innerHTML = '<option value="" disabled selected>Select...</option>' +
+                options.map((opt) => {
+                    const value = opt.toLowerCase().replace(/\s+/g, '_');
+                    return `<option value="${value}">${opt}</option>`;
+                }).join('');
+
+            checkinSecondaryContainer.appendChild(label);
+            checkinSecondaryContainer.appendChild(secondary);
+
+            secondary.addEventListener('change', () => {
+                const existingTextbox = document.getElementById('checkin-custom-detail');
+                if (existingTextbox) {
+                    existingTextbox.remove();
+                }
+
+                if (secondary.value === 'something_else') {
+                    const textbox = document.createElement('input');
+                    textbox.type = 'text';
+                    textbox.id = 'checkin-custom-detail';
+                    textbox.name = 'custom-detail';
+                    textbox.placeholder = 'Please specify...';
+                    textbox.required = true;
+                    textbox.maxLength = 200;
+                    textbox.style.marginTop = '8px';
+                    checkinSecondaryContainer.appendChild(textbox);
+                }
+            });
+        }
+
+        checkinProblemSelect.addEventListener('change', renderCheckinSecondaryField);
+
+        document.getElementById('checkin-barcode').addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                startCheckInFlow();
+            }
+        });
+
+        async function startCheckInFlow() {
+            const barcodeInput = document.getElementById('checkin-barcode');
+            const barcode = barcodeInput.value.trim();
+            if (!barcode) {
+                return;
+            }
+
+            kioskState.checkin.serial = barcode;
+            kioskState.checkin.student = null;
+            clearMessage('checkin-message');
+            document.getElementById('checkin-scan').style.display = 'none';
+            document.getElementById('checkin-form').classList.add('active');
+            document.getElementById('checkin-display-serial').textContent = barcode;
+
+            // Most scanners submit an ID + Enter. Attempt roster lookup immediately
+            // so the first scan can populate the student card without another scan.
+            if (/^\d{1,20}$/.test(barcode)) {
+                await lookupStudent(barcode);
+            } else {
+                showMessage('checkin-message', 'Scan a valid numeric student ID.', 'error');
+                document.getElementById('checkin-barcode').focus();
+            }
+        }
+
+        async function lookupStudent(studentId) {
+            if (!studentId) {
+                showMessage('checkin-message', 'Enter or scan the student ID first.', 'error');
+                return;
+            }
+
+            try {
+                clearMessage('checkin-message');
+                showMessage('checkin-message', 'Looking up student...', 'success');
+                const data = await kioskRequest('lookup-student', { studentId });
+                kioskState.checkin.student = data.student;
+                document.getElementById('checkin-student-name').textContent = data.student.firstName;
+                document.getElementById('checkin-display-name').textContent = data.student.fullName;
+                document.getElementById('checkin-display-id').textContent = data.student.studentId;
+                document.getElementById('checkin-display-email').textContent = 'Found in roster';
+                document.getElementById('checkin-greeting').classList.add('active');
+                showMessage('checkin-message', 'Student found. Finish the ticket details below.', 'success');
+            } catch (error) {
+                kioskState.checkin.student = null;
+                document.getElementById('checkin-greeting').classList.remove('active');
+                document.getElementById('checkin-display-name').textContent = 'Waiting for roster lookup';
+                document.getElementById('checkin-display-id').textContent = 'Not loaded';
+                document.getElementById('checkin-display-email').textContent = 'Not found';
+                showMessage('checkin-message', error.message, 'error');
+            }
+        }
+
+        document.getElementById('checkin-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            if (!kioskState.checkin.serial) {
+                showMessage('checkin-message', 'Scan the Chromebook barcode first.', 'error');
+                return;
+            }
+
+            if (!kioskState.checkin.student) {
+                showMessage('checkin-message', 'Look up the student before submitting.', 'error');
+                return;
+            }
+
+            try {
+                clearMessage('checkin-message');
+                const data = await kioskRequest('create-checkin-ticket', {
+                    studentId: kioskState.checkin.student.studentId,
+                    serial: kioskState.checkin.serial,
+                    problem: document.getElementById('checkin-problem').value,
+                    subproblem: document.getElementById('checkin-subproblem') ? document.getElementById('checkin-subproblem').value : '',
+                    customDetail: document.getElementById('checkin-custom-detail') ? document.getElementById('checkin-custom-detail').value : '',
+                    restarted: document.getElementById('checkin-restarted').value,
+                    schoolEmail: document.getElementById('checkin-school-email').value,
+                    classOf: document.getElementById('checkin-class-of').value,
+                    additionalInfo: document.getElementById('checkin-additional').value,
+                });
+
+                document.getElementById('checkin-greeting').classList.remove('active');
+                document.getElementById('checkin-form').classList.remove('active');
+                document.getElementById('checkin-ticket-number').textContent = data.ticketId;
+                document.getElementById('checkin-success').classList.add('active');
+
+                if (checkinRedirectTimer) {
+                    clearTimeout(checkinRedirectTimer);
+                }
+                checkinRedirectTimer = setTimeout(() => {
+                    window.location.href = 'kiosk.html';
+                }, 10000);
+            } catch (error) {
+                showMessage('checkin-message', error.message, 'error');
+            }
+        });
+
+        function resetCheckIn() {
+            if (checkinRedirectTimer) {
+                clearTimeout(checkinRedirectTimer);
+                checkinRedirectTimer = null;
+            }
+
+            kioskState.checkin.serial = '';
+            kioskState.checkin.student = null;
+            document.getElementById('checkin-scan').style.display = 'block';
+            document.getElementById('checkin-greeting').classList.remove('active');
+            document.getElementById('checkin-form').classList.remove('active');
+            document.getElementById('checkin-success').classList.remove('active');
+            document.getElementById('checkin-form').reset();
+            clearMessage('checkin-message');
+            document.getElementById('checkin-display-name').textContent = 'Waiting for roster lookup';
+            document.getElementById('checkin-display-id').textContent = 'Not scanned';
+            document.getElementById('checkin-display-email').textContent = 'Not loaded';
+            document.getElementById('checkin-display-serial').textContent = 'Not scanned';
+            checkinSecondaryContainer.innerHTML = '';
+            document.getElementById('checkin-barcode').value = '';
+            document.getElementById('checkin-barcode').focus();
+        }
+
+        document.getElementById('checkout-barcode').addEventListener('keypress', async (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                await lookupCheckoutTicket();
+            }
+        });
+
+        async function lookupCheckoutTicket() {
+            const barcode = document.getElementById('checkout-barcode').value.trim();
+            if (!barcode) {
+                return;
+            }
+
+            try {
+                clearMessage('checkout-message');
+                const data = await kioskRequest('lookup-checkout-ticket', { serial: barcode });
+                kioskState.checkout.ticket = data.ticket;
+                document.getElementById('checkout-scan').style.display = 'none';
+                document.getElementById('checkout-greeting').classList.add('active');
+                document.getElementById('checkout-form').classList.add('active');
+                document.getElementById('checkout-student-name').textContent = data.ticket.fullName;
+                document.getElementById('checkout-display-name').textContent = data.ticket.fullName;
+                document.getElementById('checkout-display-id').textContent = data.ticket.studentId;
+                document.getElementById('checkout-display-email').textContent = data.ticket.schoolEmail;
+                document.getElementById('checkout-display-serial').textContent = data.ticket.serial;
+                document.getElementById('checkout-display-ticket').textContent = `#${data.ticket.ticketId}`;
+            } catch (error) {
+                kioskState.checkout.ticket = null;
+                showMessage('checkout-message', error.message, 'error');
+                document.getElementById('checkout-form').classList.add('active');
+            }
+        }
+
+        document.getElementById('checkout-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            if (!kioskState.checkout.ticket) {
+                showMessage('checkout-message', 'Scan a Chromebook with an active ticket first.', 'error');
+                return;
+            }
+
+            try {
+                clearMessage('checkout-message');
+                const data = await kioskRequest('complete-checkout', {
+                    ticketId: kioskState.checkout.ticket.ticketId,
+                    condition: document.getElementById('checkout-condition').value,
+                    notes: document.getElementById('checkout-notes').value,
+                });
+
+                document.getElementById('checkout-greeting').classList.remove('active');
+                document.getElementById('checkout-form').classList.remove('active');
+                document.getElementById('checkout-ticket-number').textContent = data.ticketId;
+                document.getElementById('checkout-success').classList.add('active');
+            } catch (error) {
+                showMessage('checkout-message', error.message, 'error');
+            }
+        });
+
+        function resetCheckOut() {
+            kioskState.checkout.ticket = null;
+            document.getElementById('checkout-scan').style.display = 'block';
+            document.getElementById('checkout-greeting').classList.remove('active');
+            document.getElementById('checkout-form').classList.remove('active');
+            document.getElementById('checkout-success').classList.remove('active');
+            document.getElementById('checkout-form').reset();
+            clearMessage('checkout-message');
+            document.getElementById('checkout-display-name').textContent = 'Waiting for ticket lookup';
+            document.getElementById('checkout-display-id').textContent = 'Not loaded';
+            document.getElementById('checkout-display-email').textContent = 'Not provided';
+            document.getElementById('checkout-display-serial').textContent = 'Not scanned';
+            document.getElementById('checkout-display-ticket').textContent = 'Not loaded';
+            document.getElementById('checkout-barcode').value = '';
+            document.getElementById('checkout-barcode').focus();
+        }
+
+        window.addEventListener('load', () => {
+            document.getElementById('checkin-barcode').focus();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Close Ticket</title>
+    <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+            .close-ticket-container {
+                max-width: 800px;
+                margin: 40px auto;
+                padding: 30px;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            .ticket-info {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 6px;
+                margin-bottom: 25px;
+                border-left: 4px solid #667eea;
+            }
+            .form-group {
+                margin-bottom: 20px;
+            }
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #333;
+            }
+            .form-group textarea {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-family: inherit;
+                font-size: 14px;
+                resize: vertical;
+                min-height: 150px;
+            }
+            .form-group input[type="checkbox"] {
+                margin-right: 8px;
+            }
+            .button-group {
+                display: flex;
+                gap: 10px;
+                margin-top: 25px;
+            }
+            .btn {
+                padding: 12px 24px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+                transition: all 0.2s;
+            }
+            .btn-primary {
+                background: #667eea;
+                color: white;
+            }
+            .btn-primary:hover {
+                background: #5568d3;
+            }
+            .btn-secondary {
+                background: #e0e0e0;
+                color: #333;
+            }
+            .btn-secondary:hover {
+                background: #d0d0d0;
+            }
+        </style>
+    <style>
+        .close-ticket-container { color: #222; }
+        .close-ticket-container .btn { width: auto; display: inline-block; text-decoration: none; }
+    </style>
+    <script src="../js/seed-data.js"></script>
+    <script src="../js/demo.js"></script>
+</head>
+<body>
+    <div class="close-ticket-container" id="app"></div>
+    <script>
+        // Port of tech/close_ticket.php
+        (function () {
+            const esc = Bucit.esc;
+            const session = Bucit.requireTech();
+            if (!session) return;
+            const current_tech = session.tech_user;
+            const is_admin = Bucit.isAdmin(current_tech);
+            const app = document.getElementById('app');
+            const ticket_id = Bucit.param('ticket_id');
+
+            if (!ticket_id) {
+                app.innerHTML = "<h2>No Ticket ID Provided</h2><a href='manage_tickets.html'>Return to Tickets</a>";
+                return;
+            }
+            const ticket = Bucit.ticketById(ticket_id);
+            if (!ticket) {
+                app.textContent = 'Ticket not found.';
+                return;
+            }
+            if (!is_admin) {
+                const assigned = String(ticket.tech || '').trim();
+                if (assigned === '' || assigned !== current_tech) {
+                    app.innerHTML = '<p>You are not allowed to close this ticket.</p><p><a href="edit_ticket.html?id=' + ticket.id + '">Back to ticket</a></p>';
+                    return;
+                }
+            }
+
+            document.title = 'Close Ticket #' + ticket.id;
+            app.innerHTML = `<h1>Close Ticket #${esc(ticket.id)}</h1>
+            <div class="ticket-info">
+                <p><strong>Student:</strong> ${esc(ticket.first_name + ' ' + ticket.last_name)}</p>
+                <p><strong>School ID:</strong> ${esc(ticket.school_id)}</p>
+                <p><strong>Email:</strong> ${esc(ticket.school_email || 'N/A')}</p>
+                <p><strong>Problem:</strong> ${esc(ticket.problem_category || 'N/A')}</p>
+                <p><strong>Details:</strong> ${esc(ticket.problem_detail || 'N/A')}</p>
+                ${ticket.custom_detail ? `<p><strong>Additional Info:</strong> ${esc(ticket.custom_detail)}</p>` : ''}
+            </div>
+            <form method="POST" id="close-form">
+                <div class="form-group">
+                    <label for="resolution">Resolution Notes: *</label>
+                    <textarea name="resolution" id="resolution" required placeholder="Describe how the issue was resolved..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="send_email" value="1" checked style="width:auto;">
+                        Send email notification to student
+                    </label>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Close Ticket &amp; Send Email</button>
+                    <a href="edit_ticket.html?id=${ticket.id}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>`;
+
+            document.getElementById('close-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const resolution = this.resolution.value;
+                const send_email = this.send_email.checked;
+
+                ticket.status = 'Closed';
+                ticket.notes = resolution;
+                ticket.priority = 5;
+                if (!ticket.tech) ticket.tech = current_tech;
+
+                let message = 'Ticket closed successfully!';
+                let emailId = null;
+                if (send_email && ticket.school_email) {
+                    emailId = Bucit.sendEmail('closed', ticket.school_email, ticket.first_name, ticket.last_name, {
+                        ticketNumber: ticket.id,
+                        status: 'Closed',
+                        resolution: resolution,
+                        closedDate: Bucit.nowSql(),
+                    });
+                    message += ' Email notification sent.';
+                }
+                Bucit.save();
+                Bucit.setFlash({ success: message, emailId: emailId });
+                window.location.href = 'edit_ticket.html?id=' + ticket.id;
+            });
+        })();
+    </script>
+</body>
+</html>
