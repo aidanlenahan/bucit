@@ -603,8 +603,8 @@ footer {
 }
 
 textarea[style*="background: #fffbf0"] {
-  background-color: #3a2d00 !important;
-  border-color: #6b4f00 !important;
+  background-color: #fffbf0 !important;
+  border-color: #ffc107 !important;
   color: var(--text-primary) !important;
 }
 
