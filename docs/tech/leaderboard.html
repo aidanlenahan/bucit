@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bucit Ranked</title>
+    <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        :root { --brand: #800000; --brand-dark: #5a0000; }
+        body {
+            background: linear-gradient(135deg, #800000, #3d0000);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .leaderboard-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            background: rgba(255,255,255,0.98);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: baseline;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            margin: 0;
+            color: var(--brand);
+        }
+        .header-actions a {
+            background: var(--brand);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-danger { background: #f8d7da; color: #721c24; }
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .leader-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #fff7f2;
+            border: 1px solid #f3d6c8;
+            border-radius: 10px;
+            padding: 16px 20px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .leader-row:hover { transform: translateY(-3px); border-color: var(--brand); }
+        .leader-row.active { border-color: var(--brand); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
+        .leader-rank {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--brand);
+            min-width: 48px;
+            text-align: center;
+        }
+        .leader-body {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .leader-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        .leader-meta {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            color: #555;
+            font-size: 0.95rem;
+        }
+        .leader-meta span { display: flex; align-items: center; gap: 6px; }
+        .leader-meta .trophy-count { font-size: 1.05rem; font-weight: 600; color: #f5a623; }
+        @media (max-width: 600px) {
+            .leader-row { flex-direction: column; align-items: flex-start; }
+            .leader-rank { text-align: left; }
+            .leader-body { flex-direction: column; align-items: flex-start; }
+            .leader-meta { flex-direction: column; align-items: flex-start; gap: 4px; }
+        }
+        .detail-section { margin-top: 40px; }
+        .detail-header { display: flex; justify-content: space-between; align-items: center; }
+        .detail-header h2 { margin: 0; color: var(--brand); }
+        .detail-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .detail-table th, .detail-table td {
+            border-bottom: 1px solid #eee;
+            padding: 10px;
+            text-align: left;
+        }
+        .detail-table th { background: #fafafa; font-weight: 600; }
+        .ticket-link { text-decoration: none; color: var(--brand); font-weight: 600; }
+        .adjust-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px; }
+        .adjust-form input[type="number"] {
+            width: 80px;
+            padding: 4px 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .adjust-form textarea {
+            flex: 1;
+            min-width: 220px;
+            min-height: 40px;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .adjust-form button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-primary { background: var(--brand); color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .manual-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #ffeaa7;
+            color: #8a6d3b;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 6px;
+        }
+        @media (max-width: 600px) {
+            .adjust-form { flex-direction: column; align-items: stretch; }
+            .adjust-form textarea { min-width: 100%; }
+        }
+    </style>
+    <style>
+        .adjust-form button { width: auto; margin: 0; }
+        .adjust-form select { padding: 4px 6px; }
+    </style>
+    <script src="../js/seed-data.js"></script>
+    <script src="../js/demo.js"></script>
+</head>
+<body>
+<div class="leaderboard-container" id="app"></div>
+<script>
+    // Port of tech/leaderboard.php
+    (function () {
+        const esc = Bucit.esc;
+        const session = Bucit.requireTech();
+        if (!session) return;
+        const current_user = session.tech_user;
+        const is_admin = Bucit.isAdmin(current_user);
+        const data = Bucit.db();
+        const defaults = data.pointDefaults;
+        const flash = Bucit.takeFlash() || {};
+
+        Bucit.backfillPoints();
+        Bucit.save();
+
+        const selected_tech = (Bucit.param('tech') || '').trim();
+        const displayName = (username) => {
+            const t = Bucit.techByUsername(username);
+            return t && t.display_name ? t.display_name : username;
+        };
+
+        const totals = {};
+        data.ticket_points.filter((p) => !Bucit.isAdmin(p.tech)).forEach((p) => {
+            if (!totals[p.tech]) totals[p.tech] = { tech: p.tech, display_name: displayName(p.tech), total_points: 0, tickets_closed: 0 };
+            totals[p.tech].total_points += Number(p.awarded_points) || 0;
+            totals[p.tech].tickets_closed += 1;
+        });
+        const leaderboard_rows = Object.values(totals)
+            .sort((a, b) => (b.total_points - a.total_points) || a.display_name.localeCompare(b.display_name));
+
+        let detail_rows = [];
+        let detail_display_name = '';
+        if (selected_tech !== '') {
+            detail_rows = data.ticket_points.filter((p) => p.tech === selected_tech).map((p) => {
+                const t = Bucit.ticketById(p.ticket_id);
+                return Object.assign({}, p, { live_category: t ? t.problem_category : null, ticket_status: t ? t.status : null });
+            }).sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)));
+            const tech = Bucit.techByUsername(selected_tech);
+            detail_display_name = tech && tech.display_name ? tech.display_name : selected_tech.charAt(0).toUpperCase() + selected_tech.slice(1);
+        }
+
+        let html = `<div class="header">
+        <div>
+            <h1>Bucit Ranked</h1>
+            <p style="margin:4px 0 0; color:#555;">Climb the trophy ladder by closing tickets. Higher difficulty = more trophies!</p>
+        </div>
+        <div class="header-actions"><a href="manage_tickets.html">← Back to tickets</a></div>
+    </div>`;
+        if (flash.success) html += `<div class="alert alert-success">${esc(flash.success)}</div>`;
+        if (flash.error) html += `<div class="alert alert-danger">${esc(flash.error)}</div>`;
+
+        if (!leaderboard_rows.length) {
+            html += '<p>No trophies have been awarded yet. Close tickets to start the competition!</p>';
+        } else {
+            html += '<div class="leaderboard-list">' + leaderboard_rows.map((row, idx) => `
+            <a class="leader-row${selected_tech === row.tech ? ' active' : ''}" href="leaderboard.html?tech=${encodeURIComponent(row.tech)}#detail">
+                <div class="leader-rank">#${idx + 1}</div>
+                <div class="leader-body">
+                    <div class="leader-name">${esc(row.display_name)}</div>
+                    <div class="leader-meta">
+                        <span><strong>${row.tickets_closed}</strong> tickets closed</span>
+                        <span class="trophy-count">🏆 ${row.total_points}</span>
+                    </div>
+                </div>
+            </a>`).join('') + '</div>';
+        }
+
+        if (selected_tech !== '') {
+            html += `<div class="detail-section" id="detail">
+        <div class="detail-header">
+            <h2>${esc(detail_display_name)} — Ticket trophies</h2>
+            <div style="color:#666; font-size:0.9rem;">Username: ${esc(selected_tech)}</div>
+        </div>`;
+            if (!detail_rows.length) {
+                html += '<p style="margin-top:12px;">No awarded tickets yet.</p>';
+            } else {
+                html += `<table class="detail-table"><thead><tr>
+                    <th>Ticket</th><th>Category</th><th>Base</th><th>Awarded</th><th>Notes / Override</th>${is_admin ? '<th>Adjust</th>' : ''}
+                </tr></thead><tbody>` + detail_rows.map((entry) => {
+                    const currentCategory = entry.problem_category || entry.live_category || '';
+                    let normalized = currentCategory.trim().toLowerCase();
+                    if (!(normalized in defaults)) normalized = 'other';
+                    return `<tr>
+                    <td>
+                        <a class="ticket-link" href="edit_ticket.html?id=${entry.ticket_id}" target="_blank">Ticket #${entry.ticket_id}</a>
+                        <div style="font-size:0.85rem; color:#777;">Status: ${esc(entry.ticket_status || '')}</div>
+                    </td>
+                    <td>${esc(currentCategory)}</td>
+                    <td>${parseInt(entry.base_points, 10)}</td>
+                    <td>🏆 ${parseInt(entry.awarded_points, 10)}${entry.manual_override ? '<span class="manual-badge">Manual</span>' : ''}</td>
+                    <td>
+                        ${entry.notes ? `<div>${Bucit.nl2br(entry.notes)}</div>` : '<span style="color:#aaa;">No notes</span>'}
+                        <div style="font-size:0.75rem; color:#999; margin-top:4px;">Last updated by ${esc(entry.updated_by || 'system')} on ${esc(Bucit.formatDate(entry.updated_at, 'M j, Y g:i a'))}</div>
+                    </td>
+                    ${is_admin ? `<td>
+                        <form method="POST" class="adjust-form" data-points="${entry.id}">
+                            <select name="problem_category" style="min-width:140px;">
+                                ${Object.keys(defaults).map((k) => `<option value="${esc(k)}" ${normalized === k ? 'selected' : ''}>${k.charAt(0).toUpperCase() + k.slice(1)}</option>`).join('')}
+                            </select>
+                            <input type="number" name="awarded_points" min="0" value="${parseInt(entry.awarded_points, 10)}" required>
+                            <textarea name="notes" placeholder="Add admin note...">${esc(entry.notes || '')}</textarea>
+                            <button type="submit" name="update_points" value="1" class="btn-primary">Save</button>
+                            <button type="submit" name="reset_points" value="1" class="btn-secondary">Reset</button>
+                        </form>
+                    </td>` : ''}
+                </tr>`;
+                }).join('') + '</tbody></table>';
+            }
+            html += '</div>';
+        }
+
+        document.getElementById('app').innerHTML = html;
+
+        // Admin point overrides (POST handler at the top of leaderboard.php)
+        document.querySelectorAll('form[data-points]').forEach((form) => {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!is_admin) return;
+                const entry = data.ticket_points.find((p) => p.id === parseInt(form.dataset.points, 10));
+                if (!entry) return;
+                const isReset = e.submitter && e.submitter.name === 'reset_points';
+                if (isReset) {
+                    if (!window.confirm('Reset to default points for this ticket?')) return;
+                    Object.assign(entry, { awarded_points: entry.base_points, manual_override: 0, notes: null, updated_by: current_user, updated_at: Bucit.nowSql() });
+                    Bucit.setFlash({ success: 'Reset points to default value.' });
+                } else {
+                    const category = form.problem_category.value.trim() || entry.problem_category || 'other';
+                    Object.assign(entry, {
+                        problem_category: category,
+                        base_points: Bucit.defaultPoints(category),
+                        awarded_points: Math.max(0, parseInt(form.awarded_points.value, 10) || 0),
+                        manual_override: 1,
+                        notes: form.notes.value.trim(),
+                        updated_by: current_user,
+                        updated_at: Bucit.nowSql(),
+                    });
+                    Bucit.setFlash({ success: 'Updated ticket entry.' });
+                }
+                Bucit.save();
+                window.location.href = 'leaderboard.html?tech=' + encodeURIComponent(selected_tech) + '#detail';
+                window.location.reload();
+            });
+        });
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Ticket</title>
+    <link rel="icon" type="image/svg+xml" href="../img/buc.svg">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Theme variables */
+        :root { --brand: #800000; --brand-dark: #5a0000; --card-bg: rgba(255,255,255,0.98); }
+
+        body {
+            background: var(--brand);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .edit-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            color: #222;
+        }
+
+        .ticket-header h1 {
+            color: var(--brand);
+            margin: 0;
+        }
+        
+        .ticket-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .ticket-details {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .ticket-management {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            background-color: var(--brand);
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            background-color: var(--brand-dark);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+        }
+        
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-open {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-in-progress {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+        
+        .status-resolved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-closed {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-delayed {
+            background-color: #ffeaa7;
+            color: #856404;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .detail-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            color: #333;
+        }
+        
+        .alert {
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            
+            .edit-container {
+                max-width: 100%;
+                padding: 0;
+                background: white;
+            }
+            
+            .ticket-header a,
+            .ticket-management,
+            .btn,
+            .alert,
+            form,
+            button {
+                display: none !important;
+            }
+            
+            .ticket-header,
+            .ticket-details {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                page-break-inside: avoid;
+            }
+            
+            .ticket-header h1 {
+                color: black;
+            }
+            
+            .status-badge {
+                border: 1px solid #333;
+            }
+            
+            h2, h3 {
+                color: black;
+                page-break-after: avoid;
+            }
+            
+            .detail-grid {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+    <script src="../js/seed-data.js"></script>
+    <script src="../js/demo.js"></script>
+</head>
+<body>
+    <div class="edit-container" id="app"></div>
+
+    <!-- Part Notes Modal -->
+    <div id="partNotesModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div style="background-color: white; margin: 10% auto; padding: 0; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <div style="padding: 15px 20px; background-color: var(--brand); color: white; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="partNotesTitle" style="margin: 0; color: white; font-size: 18px;">Part Notes</h3>
+                <button onclick="closePartNotes()" style="background: var(--brand); color: white; border: 2px solid white; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold; line-height: 1; width: auto;" title="Close">&times;</button>
+            </div>
+            <div style="padding: 20px; color: #222;">
+                <p id="partNotesContent" style="margin: 0; white-space: pre-wrap; line-height: 1.6;"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Port of tech/edit_ticket.php
+        (function () {
+            const esc = Bucit.esc;
+            const ticket_id = Bucit.param('id');
+            if (!ticket_id || isNaN(ticket_id)) {
+                window.location.replace('manage_tickets.html');
+                return;
+            }
+            const session = Bucit.requireTech();
+            if (!session) return;
+            const current_tech = session.tech_user;
+            const data = Bucit.db();
+            const ticket = Bucit.ticketById(ticket_id);
+            if (!ticket) {
+                window.location.replace('manage_tickets.html');
+                return;
+            }
+
+            const is_admin = Bucit.isAdmin(current_tech);
+            const assigned = String(ticket.tech || '').trim();
+            const can_pickup_ticket = is_admin || assigned === '';
+            const can_edit_ticket = is_admin || assigned === current_tech;
+
+            // Technicians for dropdown/display (fallback to current assignment if needed)
+            const tech_options = data.technicians
+                .map((t) => ({ username: t.username, display_name: t.display_name || t.username, active: t.active }))
+                .sort((a, b) => a.display_name.localeCompare(b.display_name));
+            const tech_display_lookup = {};
+            tech_options.forEach((t) => { tech_display_lookup[t.username] = t.display_name; });
+            if (ticket.tech && !tech_display_lookup[ticket.tech]) {
+                tech_options.push({ username: ticket.tech, display_name: ticket.tech, active: 0 });
+                tech_display_lookup[ticket.tech] = ticket.tech;
+            }
+            const assigned_tech_display = ticket.tech ? (tech_display_lookup[ticket.tech] || ticket.tech) : '';
+
+            const inventory_parts = data.inventory.filter((p) => p.quantity > 0)
+                .sort((a, b) => a.part_name.localeCompare(b.part_name));
+            const attached_parts = data.ticket_parts.filter((tp) => tp.ticket_id === ticket.id).map((tp) => {
+                const part = data.inventory.find((i) => i.id === tp.part_id) || {};
+                return Object.assign({}, tp, { part_name: part.part_name, part_number: part.part_number });
+            });
+
+            const flash = Bucit.takeFlash() || {};
+            document.title = 'Edit Ticket #' + ticket.id;
+
+            const sel = (cond) => (cond ? 'selected' : '');
+            const detailItem = (label, value, full) => `<div class="detail-item"${full ? ' style="grid-column: 1 / -1;"' : ''}>
+                    <div class="detail-label">${label}</div>
+                    <div class="detail-value">${value}</div>
+                </div>`;
+            const statusClass = String(ticket.status || 'open').toLowerCase().replace(/ /g, '-');
+            const pd = ticket.problem_detail || '';
+            const detailOpt = (value, label) => `<option value="${esc(value)}" ${sel(pd === value)}>${esc(label)}</option>`;
+
+            let html = '';
+            if (flash.success) {
+                html += `<div class="alert alert-success">${esc(flash.success)}${flash.emailId ? ' <button type="button" class="bucit-email-link" data-email="' + flash.emailId + '">View the email</button>' : ''}</div>`;
+            }
+            if (flash.error) html += `<div class="alert alert-danger">${esc(flash.error)}</div>`;
+
+            html += `<div class="ticket-header">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <h1>Ticket #${esc(ticket.id)}</h1>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button type="button" onclick="window.print()" class="btn" style="background: var(--brand); padding: 8px 16px; width: auto;" title="Print Ticket">
+                        <img src="../img/print.png" alt="Print" style="width: 16px; height: 16px; vertical-align: middle; filter: brightness(0) invert(1); margin-right: 6px;">
+                        Print Ticket
+                    </button>
+                    <span class="status-badge status-${esc(statusClass)}">${esc(ticket.status || 'Open')}</span>
+                </div>
+            </div>
+            <div style="margin-top:8px; display:flex; gap:10px; align-items:center; justify-content:space-between;">
+                <div><small>Logged in as <strong>${esc(current_tech)}</strong> — <a href="change_password.html">Change password</a> | <a href="logout.html">Log out</a></small></div>
+            </div>
+            <div style="margin-top: 10px;">
+                <a href="manage_tickets.html" class="btn btn-secondary">Back to Tickets</a>
+            </div>
+        </div>
+
+        <div class="ticket-details">
+            <h2>Ticket Details</h2>
+            <div class="detail-grid">
+                ${detailItem('Student Name', esc(ticket.first_name + ' ' + ticket.last_name))}
+                ${detailItem('School ID', esc(ticket.school_id))}
+                ${detailItem('Class of', esc(ticket.class_of))}
+                ${detailItem('School Email', esc(ticket.school_email || ''))}
+                ${detailItem('Date Reported', Bucit.formatDate(ticket.date_reported, 'F d, Y'))}
+                ${detailItem('Date Created', Bucit.formatDate(ticket.created_at, 'F d, Y g:i A'))}
+                ${detailItem('Restarted?', ticket.restarted ? 'Yes' : 'No')}
+                ${detailItem('Tech', esc(assigned_tech_display || ticket.tech || ''))}
+                ${ticket.chromebook_sn ? detailItem('Chromebook SN', esc(ticket.chromebook_sn)) : ''}
+                ${detailItem('Picked Up', esc(ticket.picked_up || 'No'))}
+                ${ticket.pickup_date && ticket.picked_up === 'Yes' ? detailItem('Pickup Date', Bucit.formatDate(ticket.pickup_date, 'F d, Y')) : ''}
+                ${detailItem('Problem Category', esc(ticket.problem_category), true)}
+                ${ticket.problem_detail ? detailItem('Problem Detail', esc(ticket.problem_detail), true) : ''}
+                ${ticket.custom_detail ? detailItem('Custom Detail', esc(ticket.custom_detail), true) : ''}
+                ${ticket.additional_info ? detailItem('Additional Information', esc(ticket.additional_info), true) : ''}
+                ${ticket.notes ? detailItem('Admin Notes', Bucit.nl2br(ticket.notes), true) : ''}
+                ${ticket.private_notes ? `<div class="detail-item" style="grid-column: 1 / -1;">
+                    <div class="detail-label">Private Tech Notes</div>
+                    <div class="detail-value" style="background: #fff3cd; padding: 10px; border-radius: 4px; border-left: 4px solid #ffc107;">${Bucit.nl2br(ticket.private_notes)}</div>
+                </div>` : ''}
+            </div>
+        </div>
+
+        <div class="ticket-management">
+            <h2>Update Ticket</h2>`;
+
+            if (!can_edit_ticket) {
+                html += '<div class="alert alert-danger">This ticket is assigned to another technician. You have read-only access.</div>';
+            }
+            if (can_pickup_ticket && !can_edit_ticket) {
+                html += `<form method="POST" data-action="pickup" style="display:inline-block; margin-bottom:10px;">
+                    <button type="submit" class="btn" style="width:auto;">Pick up ticket</button>
+                </form>`;
+            }
+
+            if (can_edit_ticket) {
+                html += `<form method="POST" data-action="update" id="update-form">
+                <div class="form-group"><label for="first_name">First Name</label><input id="first_name" name="first_name" value="${esc(ticket.first_name || '')}"></div>
+                <div class="form-group"><label for="last_name">Last Name</label><input id="last_name" name="last_name" value="${esc(ticket.last_name || '')}"></div>
+                <div class="form-group"><label for="school_id">School ID</label><input id="school_id" name="school_id" value="${esc(ticket.school_id || '')}"></div>
+                <div class="form-group"><label for="class_of">Class of</label><input id="class_of" name="class_of" value="${esc(ticket.class_of || '')}"></div>
+                <div class="form-group"><label for="school_email">School Email</label><input type="email" id="school_email" name="school_email" value="${esc(ticket.school_email || '')}"></div>
+                <div class="form-group"><label for="chromebook_sn">Chromebook Serial Number</label><input type="text" id="chromebook_sn" name="chromebook_sn" value="${esc(ticket.chromebook_sn || '')}" placeholder="Enter Chromebook SN"></div>
+                <div class="form-group"><label for="additional_info">Additional Information</label><textarea id="additional_info" name="additional_info" maxlength="120" rows="3">${esc(ticket.additional_info || '')}</textarea></div>
+                <div class="form-group"><label for="date_reported">Date Reported</label><input type="date" id="date_reported" name="date_reported" value="${esc(ticket.date_reported || '')}"></div>
+                <div class="form-group">
+                    <label for="problem_category">Problem Category</label>
+                    <select id="problem_category" name="problem_category">
+                        ${[['screen', 'Screen not working'], ['battery', 'Battery issue'], ['keyboard', 'Keyboard not working'], ['wifi', 'WiFi connectivity'], ['login', 'Can’t log in'], ['other', 'Other']]
+                            .map(([v, l]) => `<option value="${v}" ${sel(ticket.problem_category === v)}>${l}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="problem_detail">Problem Detail</label>
+                    <select id="problem_detail" name="problem_detail">
+                        <option value="">— None —</option>
+                        <optgroup label="Battery">${detailOpt('dies_quickly', 'Dies quickly')}${detailOpt('does_not_charge', 'Does not charge')}</optgroup>
+                        <optgroup label="Screen">${detailOpt('cracked', 'Cracked')}${detailOpt('black_screen', 'Black screen')}${detailOpt('flickering_display', 'Flickering display')}</optgroup>
+                        <optgroup label="Keyboard">${detailOpt('key(s)_stuck', 'Key(s) stuck')}${detailOpt('not_typing', 'Not typing')}${detailOpt('keys_missing', 'Keys missing')}</optgroup>
+                        <optgroup label="WiFi">${detailOpt("can't_connect", "Can't connect")}${detailOpt('drops_connection', 'Drops connection')}${detailOpt('slow_speeds', 'Slow speeds')}</optgroup>
+                        <optgroup label="Login">${detailOpt('forgot_password', 'Forgot password')}${detailOpt('account_locked', 'Account locked')}</optgroup>
+                        <optgroup label="Other">${detailOpt('something_else', 'Something else')}</optgroup>
+                    </select>
+                </div>
+                <div class="form-group"><label for="custom_detail">Custom Detail</label><textarea id="custom_detail" name="custom_detail">${esc(ticket.custom_detail || '')}</textarea></div>
+                <div class="form-group">
+                    <label for="priority">Priority</label>
+                    <select id="priority" name="priority">
+                        ${[[1, '1 — Urgent'], [2, '2 — High'], [3, '3 — Normal'], [4, '4 — Low']].map(([v, l]) => `<option value="${v}" ${sel(Number(ticket.priority === null || ticket.priority === undefined ? 3 : ticket.priority) === v)}>${l}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="restarted">Restarted?</label>
+                    <select id="restarted" name="restarted">
+                        <option value="1" ${sel(!!ticket.restarted)}>Yes</option>
+                        <option value="0" ${sel(!ticket.restarted)}>No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tech">Tech</label>
+                    <select id="tech" name="tech">
+                        <option value="">— Unassigned —</option>
+                        ${tech_options.map((t) => `<option value="${esc(t.username)}" ${sel(ticket.tech === t.username)}>${esc(t.display_name)}${t.active ? '' : ' (inactive)'}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status" required>
+                        ${['Open', 'In Progress', 'Closed', 'Delayed'].map((s) => `<option value="${s}" ${sel((ticket.status || 'Open') === s)}>${s}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="picked_up">Picked Up</label>
+                    <select id="picked_up" name="picked_up" onchange="togglePickupDate(this.value)">
+                        <option value="No" ${sel(!ticket.picked_up || ticket.picked_up === 'No')}>No</option>
+                        <option value="Yes" ${sel(ticket.picked_up === 'Yes')}>Yes</option>
+                    </select>
+                </div>
+                <div class="form-group" id="pickup_date_group" style="${!ticket.picked_up || ticket.picked_up === 'No' ? 'display: none;' : ''}">
+                    <label for="pickup_date">Pickup Date</label>
+                    <input type="date" id="pickup_date" name="pickup_date" value="${esc(ticket.pickup_date || '')}">
+                </div>
+                <div class="form-group"><label for="notes">Admin Notes</label><textarea id="notes" name="notes" placeholder="Add notes about this ticket...">${esc(ticket.notes || '')}</textarea></div>
+                <div class="form-group">
+                    <label for="private_notes">Private Tech Notes</label>
+                    <textarea id="private_notes" name="private_notes" placeholder="Private notes not visible to students..." style="background: #fffbf0; border-left: 4px solid #ffc107;">${esc(ticket.private_notes || '')}</textarea>
+                    <small style="color: #856404;">⚠️ These notes will NOT be displayed in status.php to students</small>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-success" style="width:auto;">Update Ticket</button>
+                    ${(ticket.status || '') !== 'Closed' ? `<a href="close_ticket.html?ticket_id=${ticket.id}" class="btn" style="background: #28a745; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px;">✓ Close Ticket &amp; Send Email</a>` : ''}
+                </div>
+            </form>
+
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #ddd;">
+                <h3 style="color: var(--brand);">Replacement Parts</h3>`;
+
+                if (attached_parts.length) {
+                    html += `<div style="margin-bottom: 20px;">
+                    <h4>Parts Used on This Ticket</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        ${attached_parts.map((part) => `<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 6px; border: 1px solid #dee2e6;">
+                            <div style="flex: 1; display: flex; gap: 20px; align-items: center;">
+                                <div style="flex: 2;"><strong>${esc(part.part_name)}</strong></div>
+                                <div style="flex: 2; color: #666;">${esc(part.part_number || 'N/A')}</div>
+                                <div style="flex: 1; text-align: center;"><span style="background: #e9ecef; padding: 4px 12px; border-radius: 4px; font-weight: 600;">Qty: ${parseInt(part.quantity_used, 10)}</span></div>
+                            </div>
+                            <form method="POST" data-action="remove_part" data-confirm="Remove this part and return it to inventory?" style="margin: 0;">
+                                <input type="hidden" name="remove_part" value="${part.id}">
+                                <button type="submit" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: auto;" title="Remove Part">✕</button>
+                            </form>
+                        </div>`).join('')}
+                    </div>
+                </div>`;
+                }
+
+                if (inventory_parts.length) {
+                    html += `<form method="POST" data-action="attach_parts" style="margin-top: 20px;">
+                    <h4>Attach Parts to This Ticket</h4>
+                    <div style="max-height: 400px; overflow: auto; border: 1px solid #ddd; background: white;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead style="position: sticky; top: 0; background: var(--brand); color: white; z-index: 10;">
+                                <tr>
+                                    <th style="padding: 12px; text-align: left; width: 60px;">Select</th>
+                                    <th style="padding: 12px; text-align: left;">Part Name</th>
+                                    <th style="padding: 12px; text-align: left;">Part Number</th>
+                                    <th style="padding: 12px; text-align: center; width: 120px;">Available</th>
+                                    <th style="padding: 12px; text-align: center; width: 100px;">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${inventory_parts.map((part) => {
+                                    const already = attached_parts.some((a) => a.part_id === part.id);
+                                    return `<tr style="border-bottom: 1px solid #ddd; ${already ? 'background: #f8f9fa; opacity: 0.6;' : ''}">
+                                        <td style="padding: 12px; text-align: center;">
+                                            <input type="checkbox" name="parts[]" value="${part.id}" id="part_${part.id}" style="width: 18px; height: 18px; cursor: pointer;" ${already ? 'disabled' : ''}>
+                                        </td>
+                                        <td style="padding: 12px;">
+                                            <label for="part_${part.id}" style="cursor: pointer; margin: 0; font-weight: 600;">${esc(part.part_name)}</label>
+                                            ${part.notes ? `<button type="button" data-notes="${part.id}" style="background: none; border: none; cursor: pointer; padding: 0; margin-left: 4px; vertical-align: middle; width: auto;" title="View notes">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="#666" style="vertical-align: middle;"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/><path d="M8 15h8v2H8zm0-4h8v2H8zm0-4h5v2H8z"/></svg>
+                                            </button>` : ''}
+                                            ${already ? '<span style="color: #999; font-style: italic; font-size: 12px;"> (Already attached)</span>' : ''}
+                                        </td>
+                                        <td style="padding: 12px; color: #666;">${esc(part.part_number || 'N/A')}</td>
+                                        <td style="padding: 12px; text-align: center; color: #000;">${parseInt(part.quantity, 10)}</td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <input type="number" name="part_quantities[${part.id}]" data-part="${part.id}" min="1" max="${part.quantity}" value="1" style="width: 70px; padding: 6px; text-align: center; border: 1px solid #ced4da; border-radius: 4px;" ${already ? 'disabled' : ''}>
+                                        </td>
+                                    </tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button type="submit" class="btn btn-success" style="width:auto;">Attach Selected Parts</button>
+                        <a href="manage_tickets.html" class="btn btn-secondary">← Back to Tickets</a>
+                        <a href="inventory.html" class="btn" style="background-color: #6c757d;">Manage Inventory</a>
+                    </div>
+                </form>`;
+                } else {
+                    html += '<p style="color: #666;">No parts currently available in inventory. <a href="inventory.html">Add parts to inventory</a></p>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+
+            document.getElementById('app').innerHTML = html;
+
+            // ------------------------------------------------------------ actions
+            let formModified = false;
+
+            function finish(result) {
+                Bucit.save();
+                Bucit.setFlash(result);
+                formModified = false;
+                window.location.reload();
+            }
+
+            function handlePickup() {
+                if (!can_pickup_ticket) return finish({ error: 'You are not allowed to pick up this ticket.' });
+                ticket.status = 'In Progress';
+                ticket.tech = current_tech;
+                Bucit.awardPointsIfNeeded(ticket);
+                finish({ success: 'Ticket picked up successfully!' });
+            }
+
+            function handleRemovePart(form) {
+                const attachmentId = parseInt(form.elements.remove_part.value, 10);
+                const idx = data.ticket_parts.findIndex((tp) => tp.id === attachmentId && tp.ticket_id === ticket.id);
+                if (idx === -1) return finish({ error: 'Part not found.' });
+                const tp = data.ticket_parts[idx];
+                const part = data.inventory.find((p) => p.id === tp.part_id);
+                if (part) part.quantity += tp.quantity_used;
+                data.ticket_parts.splice(idx, 1);
+                finish({ success: 'Part removed and returned to inventory!' });
+            }
+
+            function handleAttachParts(form) {
+                const selected = Array.from(form.querySelectorAll('input[name="parts[]"]:checked')).map((c) => parseInt(c.value, 10));
+                if (!selected.length) return finish({});
+                // Emulate the MySQL transaction: snapshot, apply, roll back on any failure
+                const snapshot = JSON.stringify({ inventory: data.inventory, ticket_parts: data.ticket_parts });
+                try {
+                    selected.forEach((partId) => {
+                        const qtyInput = form.querySelector(`input[data-part="${partId}"]`);
+                        let quantity = qtyInput ? parseInt(qtyInput.value, 10) || 1 : 1;
+                        if (quantity < 1) quantity = 1;
+                        const part = data.inventory.find((p) => p.id === partId);
+                        if (!part) throw new Error('Part not found');
+                        if (part.quantity < quantity) throw new Error('Insufficient inventory for selected part');
+                        if (data.ticket_parts.some((tp) => tp.ticket_id === ticket.id && tp.part_id === partId)) return;
+                        Bucit.insert('ticket_parts', {
+                            ticket_id: ticket.id, part_id: partId, quantity_used: quantity, added_by: current_tech, added_at: Bucit.nowSql(),
+                        });
+                        part.quantity -= quantity;
+                    });
+                    finish({ success: 'Parts attached successfully and inventory updated!' });
+                } catch (err) {
+                    const restored = JSON.parse(snapshot);
+                    data.inventory = restored.inventory;
+                    data.ticket_parts = restored.ticket_parts;
+                    finish({ error: 'Error attaching parts: ' + err.message });
+                }
+            }
+
+            function handleUpdate(form) {
+                const v = (name) => (form.elements[name] ? form.elements[name].value : '');
+                const status = v('status') || 'Open';
+                let priority = parseInt(v('priority') || '3', 10);
+                if (status.trim().toLowerCase() === 'closed') priority = 5;
+                const picked_up = v('picked_up') || 'No';
+                let pickup_date = v('pickup_date').trim() || null;
+                if (picked_up === 'No') pickup_date = null;
+
+                Object.assign(ticket, {
+                    status,
+                    notes: v('notes').trim(),
+                    first_name: v('first_name').trim(),
+                    last_name: v('last_name').trim(),
+                    school_id: v('school_id').trim(),
+                    class_of: v('class_of').trim(),
+                    school_email: v('school_email').trim(),
+                    additional_info: v('additional_info').trim(),
+                    date_reported: v('date_reported') || ticket.date_reported,
+                    problem_category: v('problem_category'),
+                    problem_detail: v('problem_detail').trim(),
+                    custom_detail: v('custom_detail').trim(),
+                    priority,
+                    restarted: parseInt(v('restarted'), 10) ? 1 : 0,
+                    tech: v('tech').trim(),
+                    chromebook_sn: v('chromebook_sn').trim(),
+                    private_notes: v('private_notes').trim(),
+                    picked_up,
+                    pickup_date,
+                });
+                Bucit.awardPointsIfNeeded(ticket);
+                finish({ success: 'Ticket updated successfully!' });
+            }
+
+            document.querySelectorAll('form[data-action]').forEach((form) => {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if (form.dataset.confirm && !window.confirm(form.dataset.confirm)) return;
+                    const action = form.dataset.action;
+                    if (action !== 'pickup' && !can_edit_ticket) return finish({ error: 'You are not allowed to modify this ticket.' });
+                    if (action === 'pickup') handlePickup();
+                    else if (action === 'remove_part') handleRemovePart(form);
+                    else if (action === 'attach_parts') handleAttachParts(form);
+                    else handleUpdate(form);
+                });
+            });
+
+            document.querySelectorAll('[data-email]').forEach((btn) => {
+                btn.addEventListener('click', () => Bucit.showEmail(btn.dataset.email));
+            });
+
+            document.querySelectorAll('[data-notes]').forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const part = data.inventory.find((p) => p.id === parseInt(btn.dataset.notes, 10));
+                    if (part) showPartNotes(part.part_name, part.notes);
+                });
+            });
+
+            window.togglePickupDate = function (value) {
+                const group = document.getElementById('pickup_date_group');
+                if (group) {
+                    group.style.display = value === 'Yes' ? 'block' : 'none';
+                    if (value === 'No') document.getElementById('pickup_date').value = '';
+                }
+            };
+
+            function showPartNotes(partName, notes) {
+                document.getElementById('partNotesTitle').textContent = partName + ' - Notes';
+                document.getElementById('partNotesContent').textContent = notes || 'No notes available.';
+                document.getElementById('partNotesModal').style.display = 'block';
+            }
+            window.closePartNotes = function () {
+                document.getElementById('partNotesModal').style.display = 'none';
+            };
+            window.addEventListener('click', (event) => {
+                if (event.target === document.getElementById('partNotesModal')) window.closePartNotes();
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') window.closePartNotes();
+            });
+
+            // Warn before leaving page if there are unsaved changes
+            document.querySelectorAll('#app input, #app select, #app textarea').forEach((input) => {
+                if (input.type === 'hidden') return;
+                input.addEventListener('change', () => { formModified = true; });
+                if (input.tagName === 'TEXTAREA' || (input.tagName === 'INPUT' && input.type === 'text')) {
+                    input.addEventListener('input', () => { formModified = true; });
+                }
+            });
+            window.addEventListener('beforeunload', (e) => {
+                if (formModified) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                    return '';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

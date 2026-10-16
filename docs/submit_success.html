@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticket Submitted</title>
+<link rel="icon" type="image/svg+xml" href="img/buc.svg">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+:root{ --brand: #800000; --card-bg: rgba(255,255,255,0.98); }
+body{ background: var(--brand); color:#fff; min-height:100vh; }
+.container{ max-width: 720px; margin: 48px auto; background: var(--card-bg); padding: 28px; border-radius: 8px; color:#222; }
+.success-badge{ display:inline-block; padding: 8px 12px; border-radius: 6px; background: #d4edda; color:#155724; font-weight:700; }
+.primary-action{ background: var(--brand); color:#fff; padding:10px 14px; border-radius:6px; text-decoration:none; display:inline-block; }
+.secondary{ margin-left: 10px; color:#555; text-decoration:none; }
+</style>
+<script src="js/seed-data.js"></script>
+<script src="js/demo.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1 style="color:var(--brand);">Thank you — your ticket has been submitted</h1>
+
+  <div id="ticket-message"></div>
+
+  <p><a class="primary-action" id="status-link" href="status.html">Check Ticket Status</a>
+  <a class="secondary" href="form.html">Submit Another Ticket</a></p>
+
+  <hr>
+</div>
+<script>
+  // Port of submit_success.php
+  (function () {
+    const ticketId = Bucit.param('ticket_id');
+    const flash = Bucit.takeFlash();
+    const box = document.getElementById('ticket-message');
+    if (ticketId) {
+      box.innerHTML = '<p>Your ticket ID is <strong>#' + Bucit.esc(ticketId) + '</strong>. Please keep this ID to check status or for reference when contacting tech support.</p>';
+      document.getElementById('status-link').href = 'status.html?id=' + encodeURIComponent(ticketId);
+    } else {
+      box.innerHTML = '<p>Your ticket has been submitted successfully.</p>';
+    }
+    if (flash && flash.emailId) {
+      const p = document.createElement('p');
+      p.className = 'success-badge';
+      p.innerHTML = 'A confirmation email was sent. <button type="button" class="bucit-email-link">View the email</button>';
+      p.querySelector('button').addEventListener('click', function () { Bucit.showEmail(flash.emailId); });
+      box.appendChild(p);
+    }
+  })();
+</script>
+</body>
+</html>
