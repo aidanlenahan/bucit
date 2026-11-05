@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bucit.alenahan.net/sitemap.xml
